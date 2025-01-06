@@ -102,5 +102,10 @@ Thumbs.db
 # Storage
 src/storage/*
 
+# But keep the directory itself (track empty directories)
+!src/storage/.gitkeep
+
 # Celery Beat DB
 src/celerybeat-schedule.db
+
+src/test.py
