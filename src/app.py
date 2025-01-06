@@ -26,7 +26,7 @@ celery_app = celery_init_app(app)
 
 configure_celery_beat(celery_app)
 
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     return render_template('login.html')
 

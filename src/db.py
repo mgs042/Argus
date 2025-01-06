@@ -1,5 +1,59 @@
 import sqlite3
 import uuid
+import bcrypt
+
+class user:
+    db_file = "storage/user.db"
+    def __init__(self):
+        self.conn = sqlite3.connect(self.db_file)
+        self.cursor = self.conn.cursor()
+        self.initialize_user_db()
+
+    def initialize_user_db(self):   
+        # Create a table if it doesn't exist
+        self.cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            mob TEXT NOT NULL,
+            username TEXT NOT NULL,
+            password TEXT NOT NULL,
+            uid TEXT NOT NULL,
+            UNIQUE(username)
+        )
+        """)
+        self.conn.commit()
+
+    def register_user(self, name, username, password, email = "Unknown", mob = "Unknown"):
+        check = self.check_user_registered(username)
+        if check == 0:
+            try:
+                unique_id = str(uuid.uuid4())
+                password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+                self.cursor.execute("""
+                INSERT OR IGNORE INTO user (name, email, mob, username, password, uid)
+                VALUES (?, ?, ?, ?, ?)
+                """, (name, email, mob, username, password_hash, unique_id))
+                self.conn.commit()
+                return "User Registered"
+            except sqlite3.Error as e:
+                print(f"Error saving to DB: {e}")
+        else:
+            return "User Already Registered"
+    
+    def check_credentials(self, username, password):
+        if self.check_user_registered(username) != 0:
+            self.cursor.execute("""
+            SELECT password FROM user
+            WHERE username = ?
+            """, (username,))
+            password = self.cursor.fetchone()[0]
+            return bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8'))
+        else:
+            return "Unknown User"
+
+
 
 class gateway_database:
     db_file = "storage/gateway.db"
@@ -8,8 +62,7 @@ class gateway_database:
         self.cursor = self.conn.cursor()
         self.initialize_gateway_db()
 
-    def initialize_gateway_db(self):
-        
+    def initialize_gateway_db(self):   
         # Create a table if it doesn't exist
         self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS gateway (

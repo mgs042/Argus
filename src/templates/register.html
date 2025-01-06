@@ -4,7 +4,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Login</title>
+    <title>Register</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="../static/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="../static/assets/vendors/ti-icons/css/themify-icons.css">
@@ -23,21 +23,30 @@
             <div class="content-wrapper full-page-wrapper d-flex align-items-center auth login-bg">
               <div class="card col-lg-4 mx-auto login-card">
                 <div class="card-body px-5 py-5">
-                  <h3 class="card-title text-start mb-3">Login</h3>
-                  <form action="/login", method="POST">
+                  <h3 class="card-title text-start mb-3">Register</h3>
+                  <form action="/register" method="POST">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" class="form-control p_input" name="name" required>
+                    </div>
+                    <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-control p_input" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile No.</label>
+                        <input type="text" class="form-control p_input" name="mob">
+                    </div>
                     <div class="form-group">
                       <label>Username *</label>
-                      <input type="text" class="form-control p_input" name="username">
+                      <input type="text" class="form-control p_input" name="username" required>
                     </div>
                     <div class="form-group">
                       <label>Password *</label>
-                      <input type="text" class="form-control p_input">
-                    </div>
-                    <div class="form-group d-flex align-items-center justify-content-between" name="password">
-                      <a href="/register" class="forgot-pass">Register New Account</a>
+                      <input type="text" class="form-control p_input" name="password" required>
                     </div>
                     <div class="text-center d-grid gap-2">
-                      <button type="submit" class="btn btn-primary btn-block enter-btn">Login</button>
+                      <button type="submit" class="btn btn-primary btn-block enter-btn">Submit</button>
                     </div>
                   </form>
                 </div>
