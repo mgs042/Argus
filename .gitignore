@@ -98,3 +98,9 @@ Thumbs.db
 
 # Generated files
 *.lock
+
+# Storage
+src/storage/
+
+# Celery Beat DB
+src/celerybeat-schedule.db
