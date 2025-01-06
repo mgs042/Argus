@@ -110,4 +110,3 @@ src/celerybeat-schedule.db
 
 src/test.py
 
-src/config.json
