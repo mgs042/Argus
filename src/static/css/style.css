@@ -109,10 +109,6 @@
 /* === SCSS Compass Functions === */
 /* Ensure the parent container uses flexbox for wrapping */
 
-.preshnam{
-  margin-bottom: 57px !important;
-}
-
 .config-form{
   padding: 1.2rem;
 }
