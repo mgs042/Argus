@@ -37,7 +37,7 @@ Clone the repository to your local machine:
 
 ```bash
 git clone https://github.com/mgs042/Argus.git
-cd Argus
+cd argus
 ```
 
 ### **2. Docker Compose Setup**
