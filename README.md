@@ -74,6 +74,9 @@ Argus uses **Docker Compose** to manage multiple containers. Follow the steps be
     - **celery-worker (or similar)**: The workers that process background tasks.
 5. Once the containers are up and running, you can access the **Argus web dashboard** at [`http://localhost:5000`](http://localhost:5000) and monitor the device status and network security.
 
+    - **Default Username**: admin
+    - **Defualt Password**: admin1234
+
 ---
 
 ### **3. Scale Celery Workers**
