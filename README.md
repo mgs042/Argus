@@ -2,7 +2,7 @@
 
 <div style="display: flex; justify-content: space-around;">
     <img src="src/static/assets/images/examples/example1.jpg" width="500px" style="margin-right: 20px;" />
-    <img src="src/static/assets/images/examples/example2.jpg" width="500px" />
+    <img src="src/static/assets/images/examples/example2.png" width="500px" />
 </div>
 
 ## **Overview**
