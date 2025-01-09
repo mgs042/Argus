@@ -1,0 +1,9 @@
+{
+    "CHIRPSTACK_APIKEY": "<API-KEY>",
+    "CHIRPSTACK_SERVER": "<IP:Port>",
+    "MESSAGE_BROKER": "<IP:Port>",
+    "INFLUXDB_SERVER": "<IP:Port>",
+    "INFLUXDB_TOKEN": "<API-KEY>",
+    "INFLUXDB_ORG": "<Org-Name>",
+    "INFLUXDB_BUCKET": "<Bucket-Name>"
+}
