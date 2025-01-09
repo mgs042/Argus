@@ -455,5 +455,13 @@ def expired_token_callback(jwt_header, jwt_payload):
     unset_access_cookies(resp)
     return resp, 302
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('error-404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('error-500.html'), 500
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
