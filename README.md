@@ -1,5 +1,10 @@
 # **Argus: IoT Security Monitoring and Resource Management Tool**
 
+<div style="display: flex; justify-content: space-around;">
+    <img src="src/static/assets/images/examples/example1.jpg" width="200" style="margin-right: 20px;" />
+    <img src="rc/static/assets/images/examples/example1.jpg" width="200" />
+</div>
+
 ## **Overview**
 
 **Argus** is an IoT security monitoring and resource management tool designed to integrate seamlessly with the **Chirpstack Application Server**. It collects event metrics, monitors network resources, stores data in **InfluxDB**, and performs periodic **threat detection checks**. Argus utilizes **Celery** workers for background task processing, including threat detection and device status monitoring. It can be deployed as Docker containers for easy setup, scalability, and management.
@@ -37,7 +42,7 @@ Clone the repository to your local machine:
 
 ```bash
 git clone https://github.com/mgs042/Argus.git
-cd Argus
+cd argus
 ```
 
 ### **2. Docker Compose Setup**
@@ -76,9 +81,8 @@ Argus uses **Docker Compose** to manage multiple containers. Follow the steps be
 
     - **Default Username**: admin
     - **Defualt Password**: admin1234
-
+6. Make sure to setup InfluxDB at [`http://localhost:8086`](http://localhost:8086), create an Orgranization, a Bucket and an API Token to it.
 ---
-
 ### **3. Scale Celery Workers**
 
 The number of Celery workers can be scaled depending on the network traffic. To scale the number of Celery workers, use the following command:
@@ -128,12 +132,6 @@ As your network grows, Argus can be scaled to handle larger volumes of device da
 
 ---
 
-## **License**
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
 ## **Acknowledgements**
 
 - **Chirpstack** for IoT network management.
@@ -144,11 +142,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Plotly** for building the charts in the frontend dashboard.
 
 ---
-
-## **Contact**
-
-For further inquiries or contributions, contact:
-
-**Email**: mundancherygourisankar@gmail.com
-
-**GitHub**: [@mgs042](https://github.com/mgs042)
