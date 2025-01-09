@@ -43,6 +43,7 @@ services:
     container_name: influxdb2
     ports:
       - 8086:8086
+
     volumes:
       - type: volume
         source: influxdb2-data
