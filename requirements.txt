@@ -2,6 +2,7 @@ amqp==5.3.1
 asttokens==3.0.0
 attrs==24.3.0
 backcall==0.2.0
+bcrypt==4.2.1
 beautifulsoup4==4.12.3
 billiard==4.2.1
 bleach==6.2.0
@@ -22,6 +23,7 @@ executing==2.1.0
 fastjsonschema==2.21.1
 Flask==3.1.0
 Flask-Cors==5.0.0
+Flask-JWT-Extended==4.7.1
 geographiclib==2.0
 geopy==2.4.1
 google-api-core==2.24.0
@@ -64,6 +66,7 @@ pure_eval==0.2.3
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 Pygments==2.18.0
+PyJWT==2.10.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.2
