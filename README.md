@@ -128,12 +128,6 @@ As your network grows, Argus can be scaled to handle larger volumes of device da
 
 ---
 
-## **License**
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
 ## **Acknowledgements**
 
 - **Chirpstack** for IoT network management.
@@ -144,11 +138,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Plotly** for building the charts in the frontend dashboard.
 
 ---
-
-## **Contact**
-
-For further inquiries or contributions, contact:
-
-**Email**: mundancherygourisankar@gmail.com
-
-**GitHub**: [@mgs042](https://github.com/mgs042)
