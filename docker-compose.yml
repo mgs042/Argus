@@ -43,10 +43,7 @@ services:
     container_name: influxdb2
     ports:
       - 8086:8086
-    secrets:
-      - influxdb2-admin-username
-      - influxdb2-admin-password
-      - influxdb2-admin-token
+
     volumes:
       - type: volume
         source: influxdb2-data
