@@ -2,8 +2,8 @@ import sqlite3
 import uuid
 import bcrypt
 
-class user:
-    db_file = "storage/user.db"
+class user_database:
+    db_file = "user.db"
     def __init__(self):
         self.conn = sqlite3.connect(self.db_file)
         self.cursor = self.conn.cursor()
@@ -25,34 +25,69 @@ class user:
         """)
         self.conn.commit()
 
-    def register_user(self, name, username, password, email = "Unknown", mob = "Unknown"):
+    def check_user_registered(self, username):
+        self.cursor.execute("""
+        SELECT COUNT(*) FROM user WHERE username = ?
+        """, (username,))
+        result = self.cursor.fetchone()[0]
+        return result > 0
+    
+    def check_uid_registered(self, uid):
+        self.cursor.execute("""
+        SELECT COUNT(*) FROM user WHERE uid = ?
+        """, (uid,))
+        result = self.cursor.fetchone()[0]
+        return result > 0
+    
+    def fetch_user(self, uid):
+        self.cursor.execute("""
+        SELECT name, username FROM user
+        WHERE uid = ?
+        """, (uid, ))
+        result = self.cursor.fetchone()
+        return result
+
+    def register_user(self, name, email, mob, username, password):
         check = self.check_user_registered(username)
-        if check == 0:
+        if not check:
             try:
                 unique_id = str(uuid.uuid4())
                 password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
                 self.cursor.execute("""
-                INSERT OR IGNORE INTO user (name, email, mob, username, password, uid)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO user (name, email, mob, username, password, uid)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """, (name, email, mob, username, password_hash, unique_id))
                 self.conn.commit()
-                return "User Registered"
+                print("User Regisered")
             except sqlite3.Error as e:
                 print(f"Error saving to DB: {e}")
         else:
             return "User Already Registered"
     
     def check_credentials(self, username, password):
-        if self.check_user_registered(username) != 0:
+        if self.check_user_registered(username):
             self.cursor.execute("""
-            SELECT password FROM user
+            SELECT password, uid FROM user
             WHERE username = ?
             """, (username,))
-            password = self.cursor.fetchone()[0]
-            return bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8'))
+            result = self.cursor.fetchone()
+            stored_password_hash = result[0]
+            return (bcrypt.checkpw(password.encode('utf-8'), stored_password_hash), result[1])
         else:
-            return "Unknown User"
+            return False
+    
+    # Destroyer method to close the connection
+    def close(self):
+        if self.conn:
+            self.cursor.close()
+            self.conn.close()
+            print("User Database connection closed.")
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
 
 class gateway_database:

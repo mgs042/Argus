@@ -27,13 +27,13 @@
                   <form action="/login", method="POST">
                     <div class="form-group">
                       <label>Username *</label>
-                      <input type="text" class="form-control p_input" name="username">
+                      <input type="text" class="form-control p_input" name="username" required>
                     </div>
                     <div class="form-group">
                       <label>Password *</label>
-                      <input type="text" class="form-control p_input">
+                      <input type="password" class="form-control p_input" name="password" required>
                     </div>
-                    <div class="form-group d-flex align-items-center justify-content-between" name="password">
+                    <div class="form-group d-flex align-items-center justify-content-between">
                       <a href="/register" class="forgot-pass">Register New Account</a>
                     </div>
                     <div class="text-center d-grid gap-2">

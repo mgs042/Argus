@@ -112,6 +112,15 @@
 .preshnam{
   margin-bottom: 57px !important;
 }
+
+.config-form{
+  padding: 1.2rem;
+}
+
+.config-details{
+  padding: 30px;
+  max-height: 300px;
+}
 #dynamic-rows1 {
   display: flex;
   flex-wrap: wrap;

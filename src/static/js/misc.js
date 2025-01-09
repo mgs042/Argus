@@ -108,4 +108,23 @@
     })
     
   });
+
+  $(function () {
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+
+    const csrfToken = getCookie('csrf_access_token')
+    const csrfInput = document.getElementById('csrf_token');
+
+    if (csrfToken && csrfInput) {
+        csrfInput.value = csrfToken; // Set the CSRF token in the hidden input field
+    }
+
+  })
 })(jQuery);
+
