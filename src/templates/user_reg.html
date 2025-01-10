@@ -17,7 +17,17 @@
     <!-- End layout styles -->
   </head>
   <body>
-    <div class="container-scroller">
+    <script>
+      // Get flashed messages from Flask and pass to JavaScript
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          const banner_alert = "{{ messages[0] }}";  // Assign first flashed message to JS variable
+        {% endif %}
+      {% endwith %}
+    </script>
+      <div class="container-scroller">
+        <div class="row p-0 m-0 proBanner" id="proBanner">
+        </div>
       <!-- partial:partials/_sidebar.html -->
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
         <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center fixed-top">

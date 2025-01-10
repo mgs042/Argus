@@ -125,6 +125,36 @@
         csrfInput.value = csrfToken; // Set the CSRF token in the hidden input field
     }
 
+
+  })
+  
+   $(function() {
+    
+    function genBannerAlert(alert_message) {
+      return `<div class="col-md-12 p-0 m-0">
+          <div class="card-body card-body-padding px-3 d-flex align-items-center justify-content-between">
+            <div class="ps-lg-3">
+              <div class="d-flex align-items-center justify-content-between">
+                <p class="mb-0 font-weight-bold me-3">${alert_message}</p>
+              </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+              <button id="bannerClose" class="btn border-0 p-0">
+                <i class="mdi mdi-close text-white"></i>
+              </button>
+            </div>
+          </div>
+        </div>`
+    }
+    
+    if (banner_alert) {
+      $(proBanner).empty();
+      $(proBanner).append(genBannerAlert(banner_alert));
+      document.querySelector('#bannerClose').addEventListener('click',function() {
+        document.querySelector('#proBanner').classList.add('d-none');
+        document.querySelector('#proBanner').classList.remove('d-flex');
+      })
+    }
   })
 })(jQuery);
 

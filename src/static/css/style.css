@@ -109,6 +109,49 @@
 /* === SCSS Compass Functions === */
 /* Ensure the parent container uses flexbox for wrapping */
 
+.preshnam{
+  margin: 0px !important;
+}
+.image-container {
+  display: flex; /* Use flexbox */
+  justify-content: center; /* Horizontally center */
+  align-items: center; /* Vertically center */
+  width: 100%; /* Optional, ensure the container spans full width */
+  background-color: #000;
+}
+
+.image-container img {
+    width: 20%;
+    height: 80%;
+    border-radius: 50px;
+    transition: opacity 0.5s ease; /* Smoothly transition visibility */
+    animation: blink 6s infinite;
+}
+.blink-text {
+  font-family: Argus;
+  position: absolute;
+  color: whitesmoke; /* Text color */
+  font-size: 2.35rem; /* Adjust font size */
+  opacity: 0; /* Initially hidden */
+  pointer-events: none; /* Prevent interaction with the text */
+  transition: opacity 0.5s ease; /* Smoothly transition visibility */
+  animation: text-blink 6s infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 0; 
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes text-blink {
+  0% { opacity: 1; }    /* Fully visible */
+  50% { opacity: 0; }   /* Fully hidden */
+  100% { opacity: 1; }  /* Fully visible again */
+}
 .config-form{
   padding: 1.2rem;
 }
@@ -131,7 +174,6 @@
 }
 
 .login-card{
-  margin-top:120px;
 }
 /* Style for the individual card to prevent overflow */
 .card-alert {
@@ -23657,8 +23699,8 @@ dl li {
 /* === Landing screens === */
 /* Auth */
 .auth.login-bg {
-  background: url("../assets/images/wall.jpg");
-  background-size: cover;
+  background-color: #000;
+
 }
 .auth .login-half-bg {
   background: url("../assets/images/wall.jpg");

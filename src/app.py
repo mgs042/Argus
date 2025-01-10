@@ -2,7 +2,7 @@ import os
 from config import set_env_vars, check_chirpstack_server_and_api, check_influxdb_server_auth_and_resources, check_rabbitmq_server, check_config, set_config_file
 set_env_vars()
 
-from flask import Flask, request, Response, render_template, jsonify, redirect, url_for, make_response
+from flask import Flask, request, Response, render_template, jsonify, redirect, url_for, make_response, flash
 from flask_cors import CORS
 from db import gateway_database, device_database, alert_database, gw_alert_database, user_database
 from application_api import get_tenant_count, get_app_count
@@ -17,6 +17,7 @@ from flask_jwt_extended import (JWTManager, jwt_required, get_jwt_identity,
                                 unset_jwt_cookies,unset_access_cookies)
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 CORS(app)  # Enable CORS for all routes
 
 
@@ -67,12 +68,8 @@ def dashboard():
     if check_config():
         return render_template("dashboard.html", gateway_status = get_gateways_status(), device_status = get_dev_status(), alert_status = get_alert_status(), gw_alert_status = get_gw_alert_status(), tenant_count=get_tenant_count(), app_count=get_app_count(), name=name, username=username)
     else:
-        return '''
-                <script>
-                    alert("Dependencies not met");
-                    window.location.href = "/config_details";
-                </script>
-                '''
+        flash("Configuration Check Failed -- One or more of the required dependencies have not been met")
+        return redirect(url_for('config_details'))
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -89,12 +86,9 @@ def login():
             set_refresh_cookies(resp, refresh_token)
             return resp     
         else:
-            return '''
-                    <script>
-                        alert("Bad Credentials");
-                        window.location.href = "/";
-                    </script>
-                    '''
+            flash("Bad Credentials -- Username or Password is Incorrect")
+            return redirect(url_for('index'))
+
         
 @app.route('/logout', methods=['POST'])
 @jwt_required()
@@ -140,22 +134,16 @@ def user_register():
         u_password = request.form.get('password')
         u_re_password = request.form.get('re-password')
         if u_password != u_re_password:
-            return '''
-                    <script>
-                        alert("Passwords Do Not Match");
-                        window.location.href = "/user_registration";
-                    </script>
-                    '''
+            flash("Passwords do not match")
+            return redirect(url_for('user_register'))
+
         else:
             with user_database() as db:
                 result = db.register_user(u_name, u_email, u_mob, u_username, u_password)
             if result == "User Already Registered":
-                return '''
-                    <script>
-                        alert("Username Already Taken");
-                        window.location.href = "/";
-                    </script>
-                    '''
+                flash("Username already exists -- Please select a unique username")
+                return redirect(url_for('user_register'))
+
             else:
                 return redirect(url_for('index'))
             
@@ -294,12 +282,9 @@ def gateway():
             # If no 'id' is passed, return a 400 error or some default message
             return 'No gateway ID provided', 400
     else:
-        return '''
-            <script>
-                alert("Dependencies not met");
-                window.location.href = "/config_details";
-            </script>
-            '''
+        flash("Configuration Check Failed -- One or more of the required dependencies have not been met")
+        return redirect(url_for('config_details'))
+
     
 @app.route('/device', methods=['GET'])
 @jwt_required()
@@ -334,12 +319,9 @@ def device():
             # If no 'id' is passed, return a 400 error or some default message
             return 'No device ID provided', 400
     else:
-        return '''
-            <script>
-                alert("Dependencies not met");
-                window.location.href = "/config_details";
-            </script>
-            '''
+        flash("Configuration Check Failed -- One or more of the required dependencies have not been met")
+        return redirect(url_for('config_details'))
+
     
 @app.route('/gateway_metrics', methods=['GET'])
 @jwt_required()

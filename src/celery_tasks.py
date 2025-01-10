@@ -95,19 +95,20 @@ def packet_rate_task():
         uplink_interval += db.device_up_int_query()
     for device in device_list:
         query = f'''
-        from(bucket: "uplink_metrics_log")
+        from(bucket: "dev_metrics")
         |> range(start: -15m)
-        |> filter(fn: (r) => r._measurement == "device_metrics")
+        |> filter(fn: (r) => r._measurement == "avg_device_metrics")
         |> filter(fn: (r) => r.device_id == "{device[2]}")
-        |> filter(fn: (r) => r._field == "f_cnt")  // Correct filter syntax
-        |> count()
+        |> filter(fn: (r) => r._field == "packet_rate")  // Correct filter syntax
         '''
         result = query_api.query(org=org, query=query)
         # Extract the count value
-        if result:
-            # result[0].records[0]['_value'] gives you the count directly
-            count_value = result[0].records[0]['_value']
-            packet_rate[device[2]] = count_value
+        if result is not None:
+            count = 0
+            for table in result:
+                for record in table.records:
+                    count += record.get_value()
+            packet_rate[device[2]] = count
         else:
             packet_rate[device[2]] = 0
     for interval in uplink_interval:
@@ -132,15 +133,15 @@ def signal_strength_task():
         device_list += db.device_query()
     for device in device_list:
         signal_values = {
-            'rssi': 0,
-            'snr': 0
+            'avg_rssi': 0,
+            'avg_snr': 0
         }
         query = f'''
-            from(bucket: "uplink_metrics_log")
+            from(bucket: "dev_metrics")
             |> range(start: -1h)
-            |> filter(fn: (r) => r._measurement == "device_metrics")
+            |> filter(fn: (r) => r._measurement == "avg_device_metrics")
             |> filter(fn: (r) => r.device_id == "{device[2]}")
-            |> filter(fn: (r) => r._field == "rssi" or r._field == "snr")  // RSSI Values and SNR
+            |> filter(fn: (r) => r._field == "avg_rssi" or r._field == "avg_snr")  // RSSI Values and SNR
         '''
         result = query_api.query(org=org, query=query)
         if result is not None:
@@ -151,12 +152,12 @@ def signal_strength_task():
                     sum += record.get_value()
                     count += 1
                 signal_values[record.get_field()] = sum/count
-        if signal_values["rssi"] < 0:
+        if signal_values["avg_rssi"] < 0:
             with alert_database() as db:
-                print(db.alert_write(device[1], device[2], "Threshold Breach - RSSI", f'Average RSSI value is {signal_values["rssi"]} in the last 1hr'))
-        if signal_values["snr"] < 10:
+                print(db.alert_write(device[1], device[2], "Threshold Breach - RSSI", f'Average RSSI value is {signal_values["avg_rssi"]} in the last 1hr'))
+        if signal_values["avg_snr"] < 10:
             with alert_database() as db:
-                print(db.alert_write(device[1], device[2], "Threshold Breach - SNR", f'Average SNR value is {signal_values["snr"]} in the last 1hr'))
+                print(db.alert_write(device[1], device[2], "Threshold Breach - SNR", f'Average SNR value is {signal_values["avg_snr"]} in the last 1hr'))
 
 @shared_task
 def gw_signal_strength_task():
@@ -165,15 +166,15 @@ def gw_signal_strength_task():
         gateway_list += db.gateway_query()
     for gateway in gateway_list:
         signal_values = {
-            'rssi': 0,
-            'snr': 0
+            'avg_rssi': 0,
+            'avg_snr': 0
         }
         query = f'''
-            from(bucket: "uplink_metrics_log")
+            from(bucket: "gw_metrics")
             |> range(start: -1h)
-            |> filter(fn: (r) => r._measurement == "device_metrics")
+            |> filter(fn: (r) => r._measurement == "avg_gateway_metrics")
             |> filter(fn: (r) => r.gateway_id == "{gateway[2]}")
-            |> filter(fn: (r) => r._field == "rssi" or r._field == "snr")  // RSSI Values and SNR
+            |> filter(fn: (r) => r._field == "avg_rssi" or r._field == "avg_snr")  // RSSI Values and SNR
         '''
         result = query_api.query(org=org, query=query)
         if result is not None:
@@ -185,9 +186,9 @@ def gw_signal_strength_task():
                     count += 1
                 signal_values[record.get_field()] = sum/count
         print(signal_values)
-        if signal_values["rssi"] < 0:
+        if signal_values["avg_rssi"] < 0:
             with gw_alert_database() as db:
-                db.alert_write(gateway[1], gateway[2], "Threshold Breach - RSSI", f'Average RSSI value is {signal_values["rssi"]} in the last 1hr')
-        if signal_values["snr"] < 10:
+                print(db.alert_write(gateway[1], gateway[2], "Threshold Breach - RSSI", f'Average RSSI value is {signal_values["avg_rssi"]} in the last 1hr'))
+        if signal_values["avg_snr"] < 10:
             with gw_alert_database() as db:
-                db.alert_write(gateway[1], gateway[2], "Threshold Breach - SNR", f"Average SNR value is {signal_values["snr"]} in the last 1hr")
+                print(db.alert_write(gateway[1], gateway[2], "Threshold Breach - SNR", f"Average SNR value is {signal_values["avg_snr"]} in the last 1hr"))

@@ -549,7 +549,7 @@ class gw_alert_database:
                 VALUES (?, ?, ?, ?, ?)
                 """, (name, eui, issue, message, unique_id))
                 self.conn.commit()
-                return f"GW Alert Registered - {name} - {issue} - {message}"
+                return f"GW-Alert Registered - {name} - {issue} - {message}"
             except sqlite3.Error as e:
                 print(f"Error saving to DB: {e}")
         else:
@@ -559,7 +559,7 @@ class gw_alert_database:
             WHERE eui = ? and issue = ?
             """, (message, eui, issue)) 
             self.conn.commit()
-            return f"GW Alert Already Registered - {name} - {issue} - {message}"
+            return f"GW-Alert Already Registered - {name} - {issue} - {message}"
     
     def query_alert(self, eui = None):
         if eui is not None:

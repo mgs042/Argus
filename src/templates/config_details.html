@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Argus</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="../static/css/device_details.css">
     <!-- plugins:css -->
     <link rel="stylesheet" href="../static/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="../static/assets/vendors/ti-icons/css/themify-icons.css">
@@ -18,7 +17,17 @@
     <!-- End layout styles -->
 </head>
 <body>
+  <script>
+    // Get flashed messages from Flask and pass to JavaScript
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        const banner_alert = "{{ messages[0] }}";  // Assign first flashed message to JS variable
+      {% endif %}
+    {% endwith %}
+</script>
     <div class="container-scroller">
+      <div class="row p-0 m-0 proBanner" id="proBanner">
+      </div>
       <!-- partial:partials/_sidebar.html -->
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
         <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center fixed-top">
