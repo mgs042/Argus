@@ -167,11 +167,6 @@ def config_details():
         config_var = {
                     "CHIRPSTACK_APIKEY": request.form.get('chirpstack-api'),
                     "CHIRPSTACK_SERVER": chirpstack_server,
-                    "MESSAGE_BROKER": rabbitmq_server,
-                    "INFLUXDB_SERVER": influxdb_server,
-                    "INFLUXDB_TOKEN": request.form.get('influxdb-api'),
-                    "INFLUXDB_ORG": request.form.get('influxdb-org'),
-                    "INFLUXDB_BUCKET": request.form.get('influxdb-bucket')
                 }
         
         set_config_file(config_var=config_var)

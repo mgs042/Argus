@@ -2,13 +2,13 @@ version: "3"
 
 services:
   argus:
-    container_name: argus
+    container_name: Argus
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - influxdb2
-      - rabbitmq
+      - argus_influx
+      - argus_rabbitmq
     ports:
       - 5000:5000
     volumes:
@@ -19,10 +19,10 @@ services:
       context: .
     command: celery -A app.celery_app worker --loglevel=info -E
     depends_on:
-      - rabbitmq
+      - argus_rabbitmq
       - argus
     environment:
-      - CELERY_BROKER_URL=pyamqp://guest:guest@rabbitmq:5672//
+      - CELERY_BROKER_URL=pyamqp://guest:guest@argus_rabbitmq:5672//
     volumes:
       - ./src:/app
 
@@ -31,30 +31,36 @@ services:
       context: .
     command: celery -A app.celery_app beat --loglevel=info
     depends_on:
-      - rabbitmq
+      - argus_rabbitmq
       - argus
     environment:
-      - CELERY_BROKER_URL=pyamqp://guest:guest@rabbitmq:5672//
+      - CELERY_BROKER_URL=pyamqp://guest:guest@argus_rabbitmq:5672//
     volumes:
       - ./src:/app
       
-  influxdb2:
+  argus_influx:
     image: influxdb:2
-    container_name: influxdb2
+    container_name: Argus_DB
     ports:
       - 8086:8086
-
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: "admin"
+      DOCKER_INFLUXDB_INIT_PASSWORD: "admin1234"
+      DOCKER_INFLUXDB_INIT_ORG: "Argus"
+      DOCKER_INFLUXDB_INIT_BUCKET: "uplink_metrics_log"
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "OPERATOR_TOKEN_1475963987412365987456321042"
+      DEV_BUCKET: "dev_metrics"
+      GW_BUCKET: "gw_metrics"
     volumes:
-      - type: volume
-        source: influxdb2-data
-        target: /var/lib/influxdb2
-      - type: volume
-        source: influxdb2-config
-        target: /etc/influxdb2
+      - influxdb2-data:/var/lib/influxdb2
+      - influxdb2-config:/etc/influxdb2
+      - ./src/flux_tasks:/flux_tasks
+      - ./influx-init.sh:/docker-entrypoint-initdb.d/influx-init.sh
 
-  rabbitmq:
+  argus_rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq
+    container_name: Argus_Message_Broker
     ports:
       - 5672:5672
       - 15672:15672

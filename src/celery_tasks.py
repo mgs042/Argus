@@ -72,9 +72,10 @@ def update_influx(metrics_data, coordinates, device_addr):
                     gateway_location = rev_geocode(coordinates['latitude'], coordinates['longitude'], metrics_data.get(gateway_id))
                 except KeyError as e:
                     print(f"KeyError encountered: {e}")
+                    print(coordinates)
                     gateway_location = "Unknown"
             try:
-                p = influxdb_client.Point("device_metrics").tag("device_name", device_name).tag("device_id", device_id).tag("gateway_name", gateway_name).tag("gateway_id", gateway_id).tag("gateway_location", gateway_location).field("rssi", rssi).field("snr", snr).field("f_cnt", f_cnt)
+                p = influxdb_client.Point("uplink_metrics").tag("device_name", device_name).tag("device_id", device_id).tag("gateway_name", gateway_name).tag("gateway_id", gateway_id).tag("gateway_location", gateway_location).field("rssi", rssi).field("snr", snr).field("f_cnt", f_cnt)
                 write_api.write(bucket=bucket, org=org, record=p)
 
                 
@@ -99,7 +100,7 @@ def packet_rate_task():
         |> range(start: -15m)
         |> filter(fn: (r) => r._measurement == "avg_device_metrics")
         |> filter(fn: (r) => r.device_id == "{device[2]}")
-        |> filter(fn: (r) => r._field == "packet_rate")  // Correct filter syntax
+        |> filter(fn: (r) => r._field == "packet_rate")
         '''
         result = query_api.query(org=org, query=query)
         # Extract the count value

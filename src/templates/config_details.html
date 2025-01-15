@@ -168,7 +168,7 @@
                     <br>
                     <form class="forms-sample" action="/config_details" method="POST">
                       <div class="form-group row">
-                        <label for="chirpstack-server" class="col-3 col-form-label">Chirpstack Server:</label>
+                        <label for="chirpstack-server" class="col-4 col-form-label">Chirpstack Server:</label>
                         <div class="col-5">
                           <input name="chirpstack-ip" type="text" class="form-control" id="chirpstack-server" placeholder="IP Address" value="{{ chirpstack_status['ip'] }}">
                         </div>
@@ -177,45 +177,9 @@
                         </div>
                       </div>
                       <div class="form-group row">
-                        <label for="chirpstack-api" class="col-3 col-form-label">Chirpstack API Key: </label>
+                        <label for="chirpstack-api" class="col-4 col-form-label">Chirpstack API Key: </label>
                         <div class="col-7">
                           <input name="chirpstack-api" type="text" class="form-control" id="chirpstack-api" placeholder="API Key" value="{{ chirpstack_status['apikey'] }}">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="influxdb-server" class="col-3 col-form-label">InfluxDB Server: </label>
-                        <div class="col-5">
-                          <input name="influxdb-ip" type="text" class="form-control" id="influxdb-server" placeholder="IP Address" value="{{ influxdb_status['ip'] }}">
-                        </div>
-                        <div class="col-2">
-                          <input name="influxdb-port" type="text" class="form-control" id="influxdb-server" placeholder="Port" value="{{ influxdb_status['port'] }}">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="influxdb-api" class="col-3 col-form-label">InfluxDB API Token: </label>
-                        <div class="col-7">
-                          <input name="influxdb-api" type="text" class="form-control" id="influxdb-api" placeholder="API Token" value="{{ influxdb_status['apitoken'] }}">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="influxdb-org" class="col-3 col-form-label">InfluxDB Organization: </label>
-                        <div class="col-7">
-                          <input name="influxdb-org" type="text" class="form-control" id="influxdb-org" placeholder="Organization Name" value="{{ influxdb_status['org'] }}">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="influxdb-bucket" class="col-3 col-form-label">InfluxDB Bucket: </label>
-                        <div class="col-7">
-                          <input name="influxdb-bucket" type="text" class="form-control" id="influxdb-bucket" placeholder="Bucket Name" value="{{ influxdb_status['bucket'] }}">
-                        </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="rabbitmq-server" class="col-3 col-form-label">RabbitMQ Server: </label>
-                        <div class="col-5">
-                          <input name="rabbitmq-ip" type="text" class="form-control" id="rabbtimq-server" placeholder="IP Address" value="{{ rabbitmq_status['ip'] }}">
-                        </div>
-                        <div class="col-2">
-                          <input name="rabbitmq-port" type="text" class="form-control" id="rabbtimq-server" placeholder="Port" value="{{ rabbitmq_status['port'] }}">
                         </div>
                       </div>
                       <input type="hidden" id="csrf_token" name="csrf_token">

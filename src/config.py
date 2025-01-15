@@ -17,6 +17,7 @@ def set_config_file(config_var):
             config[key] = config_var[key]
     with open(CONFIG_FILE, 'w') as file:
         json.dump(config, file, indent=4)
+    set_env_vars()
     
 
 def check_chirpstack_server_and_api(server_url, api_key):
