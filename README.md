@@ -3,9 +3,7 @@
 | ![Image 1](src/static/assets/images/examples/example1.jpg) | ![Image 2](src/static/assets/images/examples/example2.jpg) |
 |-----------------------------------------------------------|-----------------------------------------------------------|
 | ![Image 3](src/static/assets/images/examples/example3.jpg) | ![Image 4](src/static/assets/images/examples/example4.jpg) |
-|-----------------------------------------------------------|-----------------------------------------------------------|
 | ![Image 5](src/static/assets/images/examples/example5.jpg) | ![Image 6](src/static/assets/images/examples/example6.jpg) |
-|-----------------------------------------------------------|-----------------------------------------------------------|
 
 
 ## **Overview**
