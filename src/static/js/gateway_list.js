@@ -74,11 +74,12 @@ $(document).ready(function () {
         // Loop through JSON data and create table rows dynamically
         data.forEach(row => {
             const html = `
-				<a href="/gateway?uid=${row[5]}" id="row_link">
+				<a href="/gateway?uid=${row[6]}" id="row_link">
 					<div class="table-row">
 						<div class="table-data" >${row[1]}</div>
 						<div class="table-data">${row[2]}</div>
 						<div class="table-data">${row[3]}</div>
+						<div class="table-data">${row[4]}</div>
 						<div class="table-data">${row[4]}</div>
 					</div>
 				</a>`;

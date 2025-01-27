@@ -10,7 +10,7 @@ from gateway_api import get_gateway_details, get_gateway_metrics, get_gateways_s
 from device_api import get_dev_details, get_dev_status
 from alert_api import get_alert_status, get_dev_alerts, get_gw_alert_status, get_gw_alerts
 from celery_tasks import celery_init_app, update_influx, configure_celery_beat
-
+from location import rev_geocode
 from flask_jwt_extended import (JWTManager, jwt_required, get_jwt_identity,
                                 create_access_token, create_refresh_token, 
                                 set_access_cookies, set_refresh_cookies, 
@@ -367,7 +367,7 @@ def data():
         rssi = data.get('rxInfo', [{}])[0].get('rssi', 0)
         snr = data.get('rxInfo', [{}])[0].get('snr', 0)
         f_cnt = data.get('fCnt', -1)
-        coordinates = data.get('rxInfo', [{}])[0].get('location', 'Unknown')
+        coordinates = data.get('rxInfo', [{}])[0].get('location', {})
         # Metrics data
         metrics_data = {
             'device_name': device_name,
@@ -393,11 +393,129 @@ def data():
         device_addr = data.get('devAddr', 'Unknown')
         with device_database() as db:
             if db.check_device_registered(device_id):
-                print("Join Request Replay")
                 with alert_database() as db2:
-                    db2.alert_write(device_name, device_id, "Join Request Replay", f"{device_name} has already joined before")
+                    print(db2.alert_write(device_name, device_id, "Join Request Replay", f"{device_name} has already joined before", 'critical'))
             else:
                 db.device_write(device_name, device_id, "Unknown", device_addr, 60)
+    elif event_type == 'status':
+        #Recieve and process JSON data
+        data = request.get_json()
+        device_name = data.get('deviceInfo', {}).get('deviceName', 'Unknown')
+        device_id = data.get('deviceInfo', {}).get('devEui', 'Unknown')
+        margin = data.get('margin', 'Unknown')
+        battery_level_unavailable = data.get('batteryLevelUnavailable', True)
+        battery_status = data.get('batteryLevel', 'Unknown')
+        if margin > 20:
+            with alert_database() as db:
+                print(db.alert_write(device_name, device_id, "High Link Margin", f'{device_name} has a high margin value of {margin}', 'low'))
+        elif margin < 5:
+            with alert_database() as db:
+                print(db.alert_write(device_name, device_id, "Low Link Margin", f'{device_name} has a low margin value of {margin}', 'critical'))
+        
+        if (not battery_level_unavailable) and battery_status < 10:
+            with alert_database() as db:
+                print(db.alert_write(device_name, device_id, "Low Battery", f'{device_name} has a low battery level of {battery_status}', 'critical'))
+    elif event_type == 'log':
+         #Recieve and process JSON data
+        data = request.get_json()
+        device_name = data.get('deviceInfo', {}).get('deviceName', 'Unknown')
+        device_id = data.get('deviceInfo', {}).get('devEui', 'Unknown')
+        level = data.get('level', '')
+        code = data.get('code', '')
+        description = data.get('description', '')
+
+        match level:
+            case 'INFO':
+                severity = 'low'
+            case 'WARNING':
+                severity = 'high'
+            case 'ERROR':
+                severity = 'critical'
+
+        match code:
+            case 'DOWNLINK_PAYLOAD_SIZE':
+                issue = 'Downlink Payload Size Error'
+            case 'UPLINK_CODEC':
+                issue = 'Uplink Codec Error'
+            case 'DOWNLINK_CODEC':
+                issue = 'Downlink Codec Error'
+            case 'OTAA':
+                issue = 'OTAA Error'
+            case 'UPLINK_F_CNT_RESET':
+                issue = 'Uplink Frame-counter Reset'
+            case 'UPLINK_MIC':
+                issue = 'Uplink MIC Error'
+            case 'UPLINK_F_CNT_RETRANSMISSION':
+                issue = 'Uplink Frame-counter Retransmission'
+            case 'DOWNLINK_GATEWAY':
+                issue = 'Downlink Gateway Error'
+            case 'RELAY_NEW_END_DEVICE':
+                issue = 'Relay the Device'
+            case 'EXPIRED':
+                issue = 'Downlink Expired'
+            case _:
+                issue = 'Unidentified Log Event'
+                severity = 'low'
+        
+        match description:
+            case 'TOO_LATE':
+                description = 'Packet is too late for Downlink to be sent'
+            case 'TOO_EARLY':
+                description = 'Downlink timestamp is too much in advance'
+            case 'COLLISION_PACKET':
+                description = 'Collides with another packet in the same timeframe'
+            case 'COLLISION_BEACON':
+                description = 'Collides with a beacon in the same timeframe'
+            case 'TX_FREQ':
+                description = 'Downlink frequency not supported by gateway'
+            case 'TX_POWER':
+                description = 'Downlink power not supported by gateway'
+            case 'GPS_UNLOCKED':
+                description = 'GPS unreliable and its timestamp cannot be used'
+            case 'QUEUE_FULL':
+                description = 'Too many pending Downlinks, queue is full'
+            case 'INTERNAL_ERROR':
+                description = 'Internal Error has occured'
+            case 'DUTY_CYCLE_OVERFLOW':
+                description = 'Transmission exceeds regulatory airtime limits'
+            case _:
+                if description == '':
+                    description = 'Unknown'
+
+        with alert_database() as db:
+            print(db.alert_write(device_id, device_name, issue, description, severity))
+    elif event_type == 'location':
+        #Recieve and process JSON data
+        data = request.get_json()
+        device_id = data.get('deviceInfo', {}).get('devEui', 'Unknown')
+        location = data.get('location', {})
+        if location != {}:
+            with device_database() as db:
+                gateway_id = db.check_device_gw(device_id)
+            with gateway_database() as db:
+                gateway_location = db.fetch_gateway_location(gateway_id)
+                gateway_name = db.fetch_gateway_name(gateway_id)
+                try:
+                    lat, long, alt = str(db.fetch_gateway_coordinates).split(',')
+                except:
+                    lat = long = alt = ''
+            if lat == '' and long == '' and alt == '':
+                    with gateway_database() as db:
+                        db.set_gateway_coord(gateway_id, f'{lat},{long},{alt}')
+            elif location['latitude'] != lat or location['longitude'] != long or location['altitude'] != alt:
+                with gateway_database() as db:
+                    db.set_gateway_coord(gateway_id, f'{lat},{long},{alt}')
+                with gw_alert_database() as db:
+                    print(db.alert_write(gateway_name, gateway_id, 'Gateway Location Changed', f'Location of {gateway_name} has changed by ({lat-location['latitude']}, {long-location['longitude']}, {alt-location['altitude']})', 'critical'))
+            if gateway_location is None:
+                try:
+                    gateway_location = rev_geocode(location['latitude'], location['longitude'], metrics_data.get(gateway_id))
+                    with gateway_database() as db:
+                        db.set_gateway_address(gateway_id, gateway_location)
+                except KeyError as e:
+                    print(f"KeyError encountered: {e}")
+
+
 
     return '', 204  # No Content
 

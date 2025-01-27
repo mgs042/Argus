@@ -5,10 +5,10 @@
       console.log('Alerts:', alerts);
   
       // Function to create a dynamic alert card
-      function createAlertCard(gateway, issue, message, uid) {
+      function createAlertCard(gateway, issue, message, severity, uid) {
         return `
           <div class="col-6">
-            <div class="card" style="background-color:rgb(97, 7, 7); margin-left:20px;">
+            <div class="card ${severity}">
               <div class="card-alert">
                 <div class="d-flex justify-content-end">
                   <a href="/delete_alert?uid=${uid}">
@@ -58,11 +58,12 @@
   
           // Loop through each item in the chunk and create a card
           chunk.forEach((item) => {
-            const [gateway, issue, message, uid] = item; // Unpack the tuple
+            const [gateway, issue, message, severity, uid] = item; // Unpack the tuple
             const cardHtml = createAlertCard(
               gateway,
               issue,
               message,
+              severity,
               uid
             ); // Create the card HTML
             rowHtml += cardHtml; // Add the card to the row

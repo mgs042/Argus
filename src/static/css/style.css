@@ -184,13 +184,23 @@
   margin-left:15px;
 }
 
-.d-alert-card{
-  background-color:rgb(150, 67, 61) !important;
+.critical{
+  background-color: #610707 !important;
   cursor: pointer !important;
 }
 
-.g-alert-card{
-  background-color:rgb(97, 7, 7) !important;
+.high{
+  background-color: #bd0009 !important;
+  cursor: pointer !important;
+}
+
+.medium{
+  background-color: #b85f00 !important;
+  cursor: pointer !important;
+}
+
+.low{
+  background-color: #005e91 !important;
   cursor: pointer !important;
 }
 

@@ -8,12 +8,11 @@
   $(function() {
 
     // Function to create a dynamic alert card
-    function createAlertCard(device, issue, uid, isGW = false) {
-      const cardClass = isGW ? 'g-alert-card' : 'd-alert-card';
+    function createAlertCard(device, issue, severity, uid, isGW = false) {
       const cardLink = isGW ? 'gateway' : 'device'
       return `
         <div class="col-sm-4 grid-margin">
-          <div class="card ${cardClass}" onclick="location.href='/${cardLink}?alert_uid=${uid}';">
+          <div class="card ${severity}" onclick="location.href='/${cardLink}?alert_uid=${uid}';">
             <div class="card-body">
               <div class="d-flex justify-content-end">
                 <a href="/delete_alert?uid=${uid}">
@@ -52,13 +51,13 @@
 
         chunk.forEach(item => {
           if (isGW){
-            const [device, issue, message, uid] = item
-            const cardHtml = createAlertCard(device, issue, uid, isGW);  // Create the card HTML
+            const [device, issue, message, severity, uid] = item
+            const cardHtml = createAlertCard(device, issue, severity, uid, isGW);  // Create the card HTML
             rowHtml += cardHtml;  // Add the card to the row
           }
           else{
-            const [device, gateway, issue, message, uid] = item;  // Unpack the tuple
-            const cardHtml = createAlertCard(device, issue, uid, isGW);  // Create the card HTML
+            const [device, gateway, issue, message, severity, uid] = item;  // Unpack the tuple
+            const cardHtml = createAlertCard(device, issue, severity, uid, isGW);  // Create the card HTML
             rowHtml += cardHtml;  // Add the card to the row
           }
         });

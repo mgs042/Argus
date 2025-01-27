@@ -17,6 +17,9 @@
     - **Packet Loss**
     - **Active/Inactive Devices and Gateways**
     - **RF Jamming (RSSI and SNR threshold breach)**
+    - **Link Margin Threshold Breach**
+    - **Battery Status**
+    - **Gateway Location Shift**
 - **Resource Management**: Argus acts as a resource management system, keeping track of:
     - All IoT **devices** and **gateways** in the network.
     - **Device and Gateway status**, including active/inactive status and metrics.
@@ -80,7 +83,7 @@ Argus uses **Docker Compose** to manage multiple containers. Follow the steps be
 
     - **Default Username**: admin
     - **Defualt Password**: admin1234
-6. Make sure to setup InfluxDB at [`http://localhost:8086`](http://localhost:8086), create an Orgranization, a Bucket and an API Token to it.
+6. Check if all the necessary components are up and running, and make changes to the configuration as necessary.
 ---
 ### **3. Scale Celery Workers**
 
@@ -90,7 +93,7 @@ The number of Celery workers can be scaled depending on the network traffic. To 
 docker-compose scale celery-worker=5
 ```
 
-This will start 5 Celery worker containers. You can adjust the number based on the network load and the number of tasks.
+This will start 5 Celery worker containers. You can adjust the number based on the load and the size of the network.
 
 ---
 
@@ -112,7 +115,10 @@ Argus is capable of detecting the following security threats:
 - **Frame Count Reset/Device Reset**: Monitors for resets of frame counters or device resets, which could indicate tampering or attacks on device integrity.
 - **Packet Loss**: Argus will soon monitor and alert for sudden or abnormal packet loss, indicating network instability or attack.
 - **Active/Inactive Devices and Gateways**: Tracks whether gateways and devices are active or inactive in the network, ensuring that all components are properly monitored for security issues.
-- **RF Jamming:** Monitors whether LoRa RF signals are not being jammed and ensures that the gateway receivers have a good signal strength and a signal-to-noise ratio to separate the original signal from the modulated carrier
+- **RF Jamming**: Monitors whether LoRa RF signals are not being jammed and ensures that the gateway receivers have a good signal strength and a signal-to-noise ratio to separate the original signal from the modulated carrier
+- **Link Margin**: Monitors whether Signal strength is optimum for LoRa signals to be decoded, it should neither be too high (unecessary wastage of power) or too low (chances of information loss).
+- **Battery Status**: Alerts when the battery level shown in the device status messages are too low.
+- **Gateway Location Shift**: Keeps track of gateway locations and detects any location shifts.
 
 ---
 

@@ -106,6 +106,7 @@ class gateway_database:
             eui TEXT NOT NULL,
             address TEXT NOT NULL,
             sim_number TEXT,
+            coordinates TEXT NOT NULL,
             uid TEXT NOT NULL,
             UNIQUE(name, eui)
         )
@@ -148,6 +149,16 @@ class gateway_database:
         result = self.cursor.fetchone()
         return result[0] if result else "Unknown"
     
+    def fetch_gateway_coordinates(self, eui):
+        # Fetch coordinates from the database
+        self.cursor.execute("""
+        SELECT coordinates FROM gateway
+        WHERE eui = ?
+        """, (eui,))
+        result = self.cursor.fetchone()
+        return result[0] if result else "Unknown"
+    
+        
     # Check if Gateway is the database
     def check_gateway_registered(self, eui):
         self.cursor.execute("""
@@ -157,16 +168,41 @@ class gateway_database:
         result = len(self.cursor.fetchall())
         return result
     
+    
+    #Set gateway address
+    def set_gateway_address(self, eui, location):
+        try:
+            self.cursor.execute("""
+            UPDATE gateway
+            SET address = ?
+            WHERE eui = ?
+            """, (location, eui)) 
+            self.conn.commit()  # Commit the changes to the database
+        except sqlite3.Error as e:
+            print(f"Error saving to DB: {e}")
+
+    #Set gateway coordinates
+    def set_gateway_coord(self, eui, coordinates):
+        try:
+            self.cursor.execute("""
+            UPDATE gateway
+            SET coordinates = ?
+            WHERE eui = ?
+            """, (coordinates, eui)) 
+            self.conn.commit()  # Commit the changes to the database
+        except sqlite3.Error as e:
+            print(f"Error saving to DB: {e}")
+
     # Save gateway to the database
-    def gateway_write(self, name, eui, address, sim_number):
+    def gateway_write(self, name, eui, address, sim_number, coordinates=''):
         check=self.check_gateway_registered(eui)
         if check== 0:
             try:
                 unique_id = str(uuid.uuid4())
                 self.cursor.execute("""
-                INSERT OR IGNORE INTO gateway (name, eui, address, sim_number, uid)
-                VALUES (?, ?, ?, ?, ?)
-                """, (name, eui, address, sim_number, unique_id))
+                INSERT OR IGNORE INTO gateway (name, eui, address, sim_number, coordinates, uid)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """, (name, eui, address, sim_number, coordinates, unique_id))
                 self.conn.commit()
                 return "Gateway Registered"
             except sqlite3.Error as e:
@@ -215,7 +251,7 @@ class device_database:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             eui TEXT NOT NULL,
-            gw_name TEXT,
+            gw_id TEXT,
             dev_addr TEXT,
             uplink_interval INTEGER NOT NULL,
             uid TEXT NOT NULL,
@@ -260,7 +296,7 @@ class device_database:
     # Check if Device gateway is the database
     def check_device_gw(self, eui):
         self.cursor.execute("""
-        SELECT gw_name FROM device
+        SELECT gw_id FROM device
         WHERE eui = ?
         """, (eui,))
         result = self.cursor.fetchone()
@@ -269,13 +305,13 @@ class device_database:
 
     
     #Set Dev gateway
-    def set_dev_gw(self, eui, gw_name):
+    def set_dev_gw(self, eui, gw_id):
         try:
             self.cursor.execute("""
             UPDATE device
-            SET gw_name = ?
+            SET gw_id = ?
             WHERE eui = ?
-            """, (gw_name, eui)) 
+            """, (gw_id, eui)) 
             self.conn.commit()  # Commit the changes to the database
         except sqlite3.Error as e:
             print(f"Error saving to DB: {e}")
@@ -284,7 +320,7 @@ class device_database:
     def get_dev_gw(self, eui):
         try:
             self.cursor.execute("""
-            SELECT gw_name from device
+            SELECT gw_id from device
             WHERE eui = ?
             """, (eui,))
             result = self.cursor.fetchone()
@@ -305,15 +341,15 @@ class device_database:
         return result[0] if result else "Unknown"
     
     # Save device to the database
-    def device_write(self, name, eui, gw_name, dev_addr, uplink_interval):
+    def device_write(self, name, eui, gw_id, dev_addr, uplink_interval):
         check=self.check_device_registered(eui)
         if check == 0:
             try:
                 unique_id = str(uuid.uuid4())
                 self.cursor.execute("""
-                INSERT OR IGNORE INTO device (name, eui, gw_name, dev_addr, uplink_interval, uid)
+                INSERT OR IGNORE INTO device (name, eui, gw_id, dev_addr, uplink_interval, uid)
                 VALUES (?, ?, ?, ?, ?, ?)
-                """, (name, eui, gw_name, dev_addr, uplink_interval, unique_id))
+                """, (name, eui, gw_id, dev_addr, uplink_interval, unique_id))
                 self.conn.commit()
                 return "Device Registered"
             except sqlite3.Error as e:
@@ -341,7 +377,17 @@ class device_database:
         except sqlite3.Error as e:
             print(f"Error retrieving from DB: {e}")
         
-
+    def gateway_up_int_query(self, gw_id):
+        try:
+            self.cursor.execute("""
+            SELECT uplink_interval FROM device
+            WHERE gw_id = ?                   
+            """,(gw_id, ))
+            result = self.cursor.fetchall()
+            return result
+        except sqlite3.Error as e:
+            print(f"Error retrieving from DB: {e}")
+    
     # Destroyer method to close the connection
     def close(self):
         if self.conn:
@@ -371,6 +417,7 @@ class alert_database:
             eui TEXT NOT NULL,
             issue TEXT NOT NULL,
             message TEXT NOT NULL,
+            severity TEXT NOT NULL,
             uid TEXT NOT NULL
         )
         """)
@@ -395,15 +442,15 @@ class alert_database:
         return result is not None
 
      # Save alert to the database
-    def alert_write(self, name, eui, issue, message):
+    def alert_write(self, name, eui, issue, message, severity):
         
         if not self.check_alert_registered(eui, issue):
             try:
                 unique_id = str(uuid.uuid4())
                 self.cursor.execute("""
-                INSERT OR IGNORE INTO alert (name, eui, issue, message, uid)
-                VALUES (?, ?, ?, ?, ?)
-                """, (name, eui, issue, message, unique_id))
+                INSERT OR IGNORE INTO alert (name, eui, issue, message, severity, uid)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """, (name, eui, issue, message, severity, unique_id))
                 self.conn.commit()
                 return f"Alert Registered - {name} - {issue} - {message}"
             except sqlite3.Error as e:
@@ -515,6 +562,7 @@ class gw_alert_database:
             eui TEXT NOT NULL,
             issue TEXT NOT NULL,
             message TEXT NOT NULL,
+            severity TEXT NOT NULL,
             uid TEXT NOT NULL
         )
         """)
@@ -539,15 +587,15 @@ class gw_alert_database:
         return result is not None
 
      # Save alert to the database
-    def alert_write(self, name, eui, issue, message):
+    def alert_write(self, name, eui, issue, message, severity):
         
         if not self.check_alert_registered(eui, issue):
             try:
                 unique_id = str(uuid.uuid4())
                 self.cursor.execute("""
-                INSERT OR IGNORE INTO alert (name, eui, issue, message, uid)
-                VALUES (?, ?, ?, ?, ?)
-                """, (name, eui, issue, message, unique_id))
+                INSERT OR IGNORE INTO alert (name, eui, issue, message, severity, uid)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """, (name, eui, issue, message, severity, unique_id))
                 self.conn.commit()
                 return f"GW-Alert Registered - {name} - {issue} - {message}"
             except sqlite3.Error as e:
