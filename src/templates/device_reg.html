@@ -35,7 +35,9 @@
     <meta name="theme-color" content="#ffffff">
   </head>
   <body>
+    <div id="flash-message" data-message="{{ get_flashed_messages()[0] if get_flashed_messages() else '' }}"></div>
     <div class="container-scroller">
+        <div class="row p-0 m-0 proBanner" id="proBanner"></div>
       <!-- partial:partials/_sidebar.html -->
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
         <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center fixed-top">
@@ -68,7 +70,7 @@
                   </div>
                 </a>
                 <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item preview-item">
+                <a href="/change_password" class="dropdown-item preview-item">
                   <div class="preview-thumbnail">
                     <div class="preview-icon bg-dark rounded-circle">
                       <i class="mdi mdi-onepassword  text-info"></i>

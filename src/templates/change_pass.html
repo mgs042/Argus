@@ -35,9 +35,9 @@
     <meta name="theme-color" content="#ffffff">
 </head>
 <body>
-  <div id="flash-message" data-message="{{ get_flashed_messages()[0] if get_flashed_messages() else '' }}"></div>
-  <div class="container-scroller">
-      <div class="row p-0 m-0 proBanner" id="proBanner"></div>
+    <div id="flash-message" data-message="{{ get_flashed_messages()[0] if get_flashed_messages() else '' }}"></div>
+    <div class="container-scroller">
+        <div class="row p-0 m-0 proBanner" id="proBanner"></div>
       <!-- partial:partials/_sidebar.html -->
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
         <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center fixed-top">
@@ -165,38 +165,32 @@
         <div class="main-panel">
           <div class="content-wrapper">
             <div class="page-header">
-              <h3 class="page-title"> Account Settings </h3>
+              <h3 class="page-title"> Change Password </h3>
             </div>
             <div class="row">
                 <div class="col-6 grid-margin stretch-card">
                   <div class="card">
                     <div class="config-form">
-                      <h4 class="card-title">Update Account Details</h4>
-                      <p class="card-description"> Enter Account Details: </p>
+                      <h4 class="card-title">Update Password</h4>
+                      <p class="card-description"> Enter Password Details: </p>
                       <br>
-                      <form class="forms-sample" action="/account_settings" method="POST">
+                      <form class="forms-sample" action="/change_password" method="POST">
                         <div class="form-group row">
-                          <label for="name" class="col-4 col-form-label">Name:</label>
+                          <label for="old_pass" class="col-4 col-form-label">Old Password:</label>
                           <div class="col-7">
-                            <input name="name" type="text" class="form-control" id="name" placeholder="Enter your Name" value="{{ user['name'] }}" required>
+                            <input name="old_pass" type="password" class="form-control" id="old_pass" placeholder="Enter your Old Password" required>
                           </div>
                         </div>
                         <div class="form-group row">
-                          <label for="email" class="col-4 col-form-label">Email ID:</label>
+                          <label for="new_pass" class="col-4 col-form-label">New Password:</label>
                           <div class="col-7">
-                            <input name="email" type="text" class="form-control" id="email" placeholder="Enter your Email" value="{{ user['email'] }}" required>
+                            <input name="new_pass" type="password" class="form-control" id="new_pass" placeholder="Enter your New Password" required>
                           </div>
                         </div>
                         <div class="form-group row">
-                            <label for="mob" class="col-4 col-form-label">Mob. No:</label>
+                            <label for="re_pass" class="col-4 col-form-label">Confirm New Password:</label>
                             <div class="col-7">
-                              <input name="mob" type="text" class="form-control" id="mob" placeholder="Enter your Mobile No." value="{{ user['mob'] }}" required>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="username" class="col-4 col-form-label">Username:</label>
-                            <div class="col-7">
-                              <input name="username" type="text" class="form-control" id="username" placeholder="Enter your Username" value="{{ user['username'] }}" required>
+                              <input name="re_pass" type="password" class="form-control" id="re_pass" placeholder="Re-Type your New Password" required>
                             </div>
                         </div>
                         <input type="hidden" id="csrf_token" name="csrf_token">

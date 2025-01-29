@@ -208,6 +208,34 @@ def account_settings():
         return redirect(url_for('account_settings'))
                     
 
+@app.route('/change_password', methods=['GET', 'POST'])
+@jwt_required()
+def change_pass():
+    uid = get_jwt_identity()
+    with user_database() as db:
+        if not db.check_uid_registered(uid):
+            return redirect(url_for('index'))
+        else:
+            name, username = db.fetch_user(uid)
+    if request.method == 'GET':
+        return render_template('change_pass.html', name=name, username=username)
+    elif request.method == 'POST':
+        u_old_password = request.form.get('old_pass')
+        u_password = request.form.get('new_pass')
+        u_re_password = request.form.get('re_pass')
+        if u_password != u_re_password:
+            flash("Passwords do not match")
+            return redirect(url_for('change_pass'))
+        else:
+            with user_database() as db:
+                check, uid = db.check_credentials(username, u_old_password)
+                if check:
+                    db.update_password(uid, u_password)
+                    print('Password Updated Successfully')
+                else:
+                    flash("Incorrect Old Password")
+                    return redirect(url_for('change_pass'))
+    return redirect(url_for('change_pass'))
 
 @app.route('/config_details', methods=['GET', 'POST'])
 @jwt_required()
@@ -233,7 +261,9 @@ def config_details():
                     "INFLUXDB_SERVER": "",
                     "INFLUXDB_TOKEN": "",
                     "INFLUXDB_ORG": "",
-                    "INFLUXDB_BUCKET": ""
+                    "INFLUXDB_BUCKET": "",
+                    "BOT_ID": request.form.get('bot_id'),
+                    "CHAT_ID": request.form.get('chat_id')
                 }
 
         
@@ -242,7 +272,8 @@ def config_details():
     chirpstack_status = check_chirpstack_server_and_api(os.getenv("CHIRPSTACK_SERVER"), os.getenv("CHIRPSTACK_APIKEY"))
     influxdb_status = check_influxdb_server_auth_and_resources(os.getenv("INFLUXDB_SERVER"), os.getenv("INFLUXDB_TOKEN"), os.getenv("INFLUXDB_ORG"), os.getenv("INFLUXDB_BUCKET"))
     rabbitmq_status = check_rabbitmq_server(os.getenv("MESSAGE_BROKER"))
-    return render_template("config_details.html", chirpstack_status=chirpstack_status, influxdb_status=influxdb_status, rabbitmq_status=rabbitmq_status, name=name, username=username)
+    telegram_status = check_telegram_status(os.getenv("BOT_ID"), os.getenv("CHAT_ID"))
+    return render_template("config_details.html", chirpstack_status=chirpstack_status, influxdb_status=influxdb_status, rabbitmq_status=rabbitmq_status, telegram_status=telegram_status, name=name, username=username)
 
 
 @app.route('/gateway_registration', methods=['GET', 'POST'])

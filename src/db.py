@@ -92,6 +92,19 @@ class user_database:
             print("User details Updated")
         except sqlite3.Error as e:
             print(f"Error saving to DB: {e}")
+
+    def update_password(self, uid, password):
+        try:
+            password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            self.cursor.execute("""
+            UPDATE user
+            SET password = ?
+            WHERE uid = ?   
+            """, (password_hash, uid))
+            self.conn.commit()
+            print("Password Updated")
+        except sqlite3.Error as e:
+            print(f"Error saving to DB: {e}")
     
     def check_credentials(self, username, password):
         if self.check_user_registered(username):

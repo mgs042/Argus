@@ -13,7 +13,7 @@ def set_config_file(config_var):
     with open(CONFIG_FILE, 'r') as file:
         config = json.load(file)
     for key in config:
-        if config[key] != config_var[key] and (config_var[key] != '' and config_var[key] != ':') :
+        if config[key] != config_var[key] and (config_var[key] != '' and config_var[key] != ':' and config_var[key] != None) :
             config[key] = config_var[key]
     with open(CONFIG_FILE, 'w') as file:
         json.dump(config, file, indent=4)
@@ -183,6 +183,40 @@ def check_rabbitmq_server(server_url, username='guest', password='guest'):
     results = {
         "ip": ip,
         "port": port,
+        "server_health": {"reachable": None, "details": None},
+    }
+
+    # Check server health using the /api/health endpoint
+    try:
+        
+        ip = server_url.split(':')
+        health_response = requests.get(f"http://{ip[0]}:15672/api/health/checks/alarms", auth=HTTPBasicAuth(username, password), timeout=5)
+
+        if health_response.status_code != 200:
+            results["server_health"]["reachable"] = False
+            results["server_health"]["details"] = health_response.json()
+        else:
+            results["server_health"]["reachable"] = True
+            results["server_health"]["details"] = "RabbitMQ is healthy."
+    except requests.RequestException as e:
+        e = list(str(e.__class__.__name__))
+        error=""+e[0]
+        for i in range(1,len(e)):
+            if e[i].isupper():
+                error+=(" "+e[i])
+            else:
+                error+=e[i]
+        results["server_health"]["reachable"] = False
+        results["server_health"]["details"] = error
+    return results
+
+def check_telegram_status(botId, chatId):
+    """
+    Check the validity of Telegram BoT ID and Chat ID.
+    """
+    results = {
+        "botId": botId,
+        "chatId": port,
         "server_health": {"reachable": None, "details": None},
     }
 

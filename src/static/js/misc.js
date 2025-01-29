@@ -146,6 +146,8 @@
           </div>
         </div>`
     }
+    let flashMessageDiv = document.getElementById("flash-message");
+    let banner_alert = flashMessageDiv.getAttribute("data-message");
     
     if (banner_alert) {
       $(proBanner).empty();

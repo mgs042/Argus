@@ -11,7 +11,7 @@
 
 ## **Overview**
 
-**Argus** is an IoT security monitoring and resource management tool designed to integrate seamlessly with the **Chirpstack Application Server**. It collects event metrics, monitors network resources, stores data in **InfluxDB**, and performs periodic **threat detection checks**. Argus utilizes **Celery** workers for background task processing, including threat detection and device status monitoring. It can be deployed as Docker containers for easy setup, scalability, and management.
+**Argus** is an IoT security monitoring and resource management tool designed to integrate seamlessly with the **Chirpstack Application Server**. It collects event metrics, monitors network resources, stores relevant metrics in **InfluxDB**, and downsamples it with pre-defined Influx Tasks. Argus utilizes **Celery** workers for background task processing, including periodic **threat detection checks** and metric data processing. It can be deployed as Docker containers via Docker Compose for easy setup, scalability, and management.
 
 ### **Key Features:**
 
