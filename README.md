@@ -1,5 +1,5 @@
 # **Argus: IoT Security Monitoring and Resource Management Tool**
-
+![Image](/src/static/assets/images/title.png)
 ![Image](https://github.com/user-attachments/assets/159942f1-8c06-447d-90e3-d1fcd870d263)
 
 
