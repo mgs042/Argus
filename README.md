@@ -1,10 +1,11 @@
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/929f6ab6-28d8-4da1-8184-565eba1d73c8" alt="Logo">
+  <img src='/src/static/assets/images/eye.png' alt='Logo'>
+  <img src="https://github.com/user-attachments/assets/929f6ab6-28d8-4da1-8184-565eba1d73c8" alt="Title">
 </div>
 
 # **IoT Security Monitoring and Resource Management Tool**
 
-![Image](https://github.com/user-attachments/assets/159942f1-8c06-447d-90e3-d1fcd870d263)
+![Demo-Video](https://github.com/user-attachments/assets/159942f1-8c06-447d-90e3-d1fcd870d263)
 
 
 ## **Overview**
