@@ -1,13 +1,16 @@
 import os
 from config import set_env_vars, check_chirpstack_server_and_api, check_influxdb_server_auth_and_resources, check_rabbitmq_server, check_config, set_config_file
 set_env_vars()
-
 from flask import Flask, request, Response, render_template, jsonify, redirect, url_for, make_response, flash
 from flask_cors import CORS
 from db import gateway_database, device_database, alert_database, gw_alert_database, user_database
+with alert_database() as db:
+    db.clear_alert_table()
+with gw_alert_database() as db:
+    db.clear_alert_table()
 from application_api import get_tenant_count, get_app_count
 from gateway_api import get_gateway_details, get_gateway_metrics, get_gateways_status
-from device_api import get_dev_details, get_dev_status
+from device_api import get_dev_details, get_dev_status, get_device_metrics
 from alert_api import get_alert_status, get_dev_alerts, get_gw_alert_status, get_gw_alerts
 from celery_tasks import celery_init_app, update_influx, configure_celery_beat
 from location import rev_geocode
@@ -66,10 +69,41 @@ def dashboard():
         else:
             name, username = db.fetch_user(uid)
     if check_config():
-        return render_template("dashboard.html", gateway_status = get_gateways_status(), device_status = get_dev_status(), alert_status = get_alert_status(), gw_alert_status = get_gw_alert_status(), tenant_count=get_tenant_count(), app_count=get_app_count(), name=name, username=username)
+        return render_template("dashboard.html", tenant_count=get_tenant_count(), app_count=get_app_count(), name=name, username=username)
     else:
         flash("Configuration Check Failed -- One or more of the required dependencies have not been met")
         return redirect(url_for('config_details'))
+    
+@app.route('/device_alerts', methods=['GET'])
+@jwt_required()
+def device_status():
+    uid = get_jwt_identity()
+    with user_database() as db:
+        if not db.check_uid_registered(uid):
+            return redirect(url_for('index'))
+    return jsonify(get_alert_status())
+
+@app.route('/gateway_alerts', methods=['GET'])
+@jwt_required()
+def gateway_alerts():
+    uid = get_jwt_identity()
+    with user_database() as db:
+        if not db.check_uid_registered(uid):
+            return redirect(url_for('index'))
+    return jsonify(get_gw_alert_status())
+    
+@app.route('/status_data', methods=['GET'])
+@jwt_required()
+def status_data():
+    uid = get_jwt_identity()
+    with user_database() as db:
+        if not db.check_uid_registered(uid):
+            return redirect(url_for('index'))
+    return {
+        'gateways': get_gateways_status(),
+        'devices': get_dev_status()
+    }
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -147,6 +181,34 @@ def user_register():
             else:
                 return redirect(url_for('index'))
             
+
+@app.route('/account_settings', methods=['GET', 'POST'])
+@jwt_required()
+def account_settings():
+    uid = get_jwt_identity()
+    with user_database() as db:
+        if not db.check_uid_registered(uid):
+            return redirect(url_for('index'))
+        else:
+            name, username = db.fetch_user(uid)
+        user = db.fetch_user_details(uid)
+    if request.method == 'GET':
+        return render_template('account_settings.html', name=name, username=username, user = user)
+    elif request.method == 'POST':
+        u_name = request.form.get('name')
+        u_email = request.form.get('email') or "Unknown"
+        u_mob = request.form.get('mob') or "Unknown"
+        u_username = request.form.get('username')
+        with user_database() as db:
+            if u_username != username and db.check_user_registered(u_username):
+                flash("Username already exists -- Please select a unique username")
+                return redirect(url_for('account_settings'))
+            else:
+                db.update_user(u_name, u_email, u_mob, u_username, uid)
+        return redirect(url_for('account_settings'))
+                    
+
+
 @app.route('/config_details', methods=['GET', 'POST'])
 @jwt_required()
 def config_details():
@@ -167,7 +229,13 @@ def config_details():
         config_var = {
                     "CHIRPSTACK_APIKEY": request.form.get('chirpstack-api'),
                     "CHIRPSTACK_SERVER": chirpstack_server,
+                    "MESSAGE_BROKER": "",
+                    "INFLUXDB_SERVER": "",
+                    "INFLUXDB_TOKEN": "",
+                    "INFLUXDB_ORG": "",
+                    "INFLUXDB_BUCKET": ""
                 }
+
         
         set_config_file(config_var=config_var)
 
@@ -297,6 +365,8 @@ def device():
         if alert_uid is not None:
             with alert_database() as db:
                 device_eui = db.get_alert_dev_eui(alert_uid)
+            with device_database() as db:
+                device_uid = db.fetch_device_uid(device_eui)
         elif device_uid is not None:
             with device_database() as db:
                 device_eui = db.fetch_device_eui(device_uid)
@@ -308,7 +378,7 @@ def device():
             else:
                 device_details = get_dev_details(device_eui)
                 device_alerts = get_dev_alerts(device_eui)
-                return render_template("device_details.html", device=device_details, dev_alerts=device_alerts, name=name, username=username)
+                return render_template("device_details.html", device=device_details, uid=device_uid, dev_alerts=device_alerts, name=name, username=username)
         
         else:
             # If no 'id' is passed, return a 400 error or some default message
@@ -330,6 +400,19 @@ def gateway_metrics():
     with gateway_database() as db:
         gateway_id = db.fetch_gateway_eui(gateway_uid)
     return get_gateway_metrics(gateway_id)
+
+@app.route('/device_metrics', methods=['GET'])
+@jwt_required()
+def device_metrics():
+    uid = get_jwt_identity()
+    with user_database() as db:
+        if not db.check_uid_registered(uid):
+            return redirect(url_for('index'))
+    # Get the 'uid' parameter from the query string
+    device_uid = request.args.get('uid')
+    with device_database() as db:
+        device_id = db.fetch_device_eui(device_uid)
+    return get_device_metrics(device_id)
 
 @app.route('/gateway_data', methods=["GET"])
 @jwt_required()

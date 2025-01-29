@@ -1,4 +1,4 @@
-console.log(gatewayUid)
+console.log(deviceUid)
 
 // Global label-to-color mapping
 const labelColorMap = {};
@@ -17,26 +17,26 @@ else{
 
 }
 
-fetch(`/gateway_metrics?uid=${gatewayUid}`)
+fetch(`/device_metrics?uid=${deviceUid}`)
 .then(response => response.json())
 .then(data => {
+    console.log(data)
     const chartData = [
         { id: "rxPackets", data: data.rxPackets },
-        { id: "txPackets", data: data.txPackets },
-        { id: "txPacketsPerFreq", data: data.txPacketsPerFreq },
+        { id: "rssi", data: data.gwRssi },
+        { id: "snr", data: data.gwSnr },
         { id: "rxPacketsPerFreq", data: data.rxPacketsPerFreq },
-        { id: "txPacketsPerDr", data: data.txPacketsPerDr },
         { id: "rxPacketsPerDr", data: data.rxPacketsPerDr },
-        { id: "txPacketsPerStatus", data: data.txPacketsPerStatus }
+        { id: "errors", data: data.errors }
     ];
+    console.log(chartData)
     chartData.forEach(chart => {
         const container = document.getElementById(chart.id);
 
         if (chart.data.datasets && chart.data.datasets.length > 0) {
-            const isFreqChart = ['txPacketsPerFreq', 'rxPacketsPerFreq'].includes(chart.id);
-            const isDRChart = ['txPacketsPerDr', 'rxPacketsPerDr'].includes(chart.id);
-            const isStatusChart = ['txPacketsPerStatus'].includes(chart.id);
-            const isLineChart = ['rxPackets', 'txPackets'].includes(chart.id);
+            const isFreqChart = ['rxPacketsPerFreq'].includes(chart.id);
+            const isDRChart = ['rxPacketsPerDr'].includes(chart.id);
+            const isLineChart = ['rxPackets', 'rssi', 'snr', 'errors'].includes(chart.id);
 
             if (isFreqChart) {
                 // Sort datasets by frequency label (ascending order)
@@ -156,30 +156,7 @@ fetch(`/gateway_metrics?uid=${gatewayUid}`)
 
                 Plotly.newPlot(chart.id, [trace], layout, {displayModeBar: false});
 
-            } else if (isStatusChart) {
-                // Normal Bar Chart for status
-                const traces = chart.data.datasets.map(dataset => ({
-                    x: chart.data.timestamps,
-                    y: dataset.data,
-                    type: 'bar',
-                    name: dataset.label
-                }));
-
-                const layout = {
-                    title: chart.data.name,
-                    plot_bgcolor: 'rgba(160, 160, 160, 0.8)',
-                    paper_bgcolor: 'rgba(187, 179, 255, 0.81)',
-                    xaxis: {
-                        title: 'Time',
-                        type: 'date',
-                        tickformat: "%H:%M",
-                        dtick: 60 * 60 * 1000
-                    },
-                    yaxis: { title: 'Count' }
-                };
-
-                Plotly.newPlot(chart.id, traces, layout, {displayModeBar: false});
-            }
+            } 
         }
         else {
             container.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 1.0em;">

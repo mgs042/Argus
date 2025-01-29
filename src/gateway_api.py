@@ -122,14 +122,14 @@ def get_gateway_metrics(gateway_id):
     chirpstack_server = os.getenv('CHIRPSTACK_SERVER')
     auth_token = [("authorization", "Bearer %s" % api_token)]
 
-    # Current time in Indian Standard Time (IST)
-    end_time_ist = datetime.now()
+    # Get the current time
+    now = datetime.now()
 
-    # Subtract 5 hours and 30 minutes to get UTC
-    end_time_utc = end_time_ist - timedelta(hours=5, minutes=30)
+    # Round down to the last completed hour (e.g., 12:30 -> 12:00)
+    end_time_utc = now.replace(minute=0, second=0, microsecond=0)
 
     # Start time as 1 hour ago (adjusted to UTC)
-    start_time_utc = end_time_utc - timedelta(hours=6)
+    start_time_utc = end_time_utc - timedelta(hours=7)
 
     # Convert datetime to Timestamp (Protobuf Timestamp format)
     start_timestamp = Timestamp()

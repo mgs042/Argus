@@ -23,6 +23,7 @@ services:
       - argus
     environment:
       - CELERY_BROKER_URL=pyamqp://guest:guest@argus_rabbitmq:5672//
+    scale: 3
     volumes:
       - ./src:/app
 

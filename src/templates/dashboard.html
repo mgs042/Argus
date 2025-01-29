@@ -15,16 +15,26 @@
     <!-- Layout styles -->
     <link rel="stylesheet" href="../static/css/style.css">
     <!-- End layout styles -->
+     <!--Icons-->
+     <link rel="apple-touch-icon" sizes="57x57" href="../static/assets/favicon/apple-icon-57x57.png">
+      <link rel="apple-touch-icon" sizes="60x60" href="../static/assets/favicon/apple-icon-60x60.png">
+      <link rel="apple-touch-icon" sizes="72x72" href="../static/assets/favicon/apple-icon-72x72.png">
+      <link rel="apple-touch-icon" sizes="76x76" href="../static/assets/favicon/apple-icon-76x76.png">
+      <link rel="apple-touch-icon" sizes="114x114" href="../static/assets/favicon/apple-icon-114x114.png">
+      <link rel="apple-touch-icon" sizes="120x120" href="../static/assets/favicon/apple-icon-120x120.png">
+      <link rel="apple-touch-icon" sizes="144x144" href="../static/assets/favicon/apple-icon-144x144.png">
+      <link rel="apple-touch-icon" sizes="152x152" href="../static/assets/favicon/apple-icon-152x152.png">
+      <link rel="apple-touch-icon" sizes="180x180" href="../static/assets/favicon/apple-icon-180x180.png">
+      <link rel="icon" type="image/png" sizes="192x192"  href="../static/assets/favicon/android-icon-192x192.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="../static/assets/favicon/favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="96x96" href="../static/assets/favicon/favicon-96x96.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="../static/assets/favicon/favicon-16x16.png">
+      <link rel="manifest" href="../static/assets/favicon/manifest.json">
+      <meta name="msapplication-TileColor" content="#ffffff">
+      <meta name="msapplication-TileImage" content="../static/assets/favicon/ms-icon-144x144.png">
+      <meta name="theme-color" content="#ffffff">
   </head>
   <body>
-    <script>
-      const g_status = {{ gateway_status|tojson }};
-      const d_status = {{ device_status|tojson }};
-      const alerts = {{ alert_status|tojson }};
-      const gw_alerts = {{ gw_alert_status|tojson }};
-      console.log("Gateway Status:", g_status);
-      console.log("Device Status:", d_status);
-  </script>
     <div class="container-scroller">
       <!-- partial:partials/_sidebar.html -->
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
@@ -48,7 +58,7 @@
               </div> 
               <a href="#" id="profile-dropdown" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></a>
               <div class="dropdown-menu dropdown-menu-right sidebar-dropdown preview-list" aria-labelledby="profile-dropdown">
-                <a href="#" class="dropdown-item preview-item">
+                <a href="/account_settings" class="dropdown-item preview-item">
                   <div class="preview-thumbnail">
                     <div class="preview-icon bg-dark rounded-circle">
                       <i class="mdi mdi-cog text-primary"></i>
@@ -163,7 +173,7 @@
                     <div class="row">
                       <div class="col-9">
                         <div class="d-flex align-items-center align-self-start">
-                          <h1 class="mb-0">{{ device_status.total }}</h1>
+                          <h1 class="mb-0 device_count"></h1>
                         </div>
                       </div>
                       <div class="col-3">
@@ -184,7 +194,7 @@
                     <div class="row">
                       <div class="col-9">
                         <div class="d-flex align-items-center align-self-start">
-                          <h1 class="mb-0">{{ gateway_status.total }}</h1>
+                          <h1 class="mb-0 gateway_count"></h1>
                         </div>
                       </div>
                       <div class="col-3">
@@ -247,7 +257,7 @@
                       <div class="daoughnutchart-wrapper">
                         <canvas id="devices_donut" class="transaction-chart"></canvas>
                       </div>
-                      <div class="custom-value">{{ device_status.total }}<span>Total</span>
+                      <div class="custom-value "><div class="device_count"></div><span>Total</span>
                       </div>
                     </div>
                     <div class="bg-gray-dark d-flex d-md-block d-xl-block flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">
@@ -267,7 +277,7 @@
                       <div class="daoughnutchart-wrapper">
                         <canvas id="gateways_donut" class="transaction-chart"></canvas>
                       </div>
-                      <div class="custom-value">{{ gateway_status.total }}<span>Total</span>
+                      <div class="custom-value"><div class="gateway_count"></div><span>Total</span>
                       </div>
                     </div>
                     <div class="bg-gray-dark d-flex d-md-block d-xl-block flex-row py-3 px-4 px-md-3 px-xl-4 rounded mt-3">

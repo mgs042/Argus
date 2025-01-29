@@ -28,7 +28,11 @@ def check_chirpstack_server_and_api(server_url, api_key):
     :param api_key: The API key for authentication.
     :return: A dictionary with health and API key validity status.
     """
-    ip, port = server_url.split(':')
+    try:
+        ip, port = server_url.split(':')
+    except:
+        ip = ""
+        port = ""
     results = {
         "ip": ip,
         "port": port,

@@ -109,6 +109,9 @@
 /* === SCSS Compass Functions === */
 /* Ensure the parent container uses flexbox for wrapping */
 
+#dynamic-rows{
+  margin-left: 20px;
+}
 .preshnam{
   margin: 0px !important;
 }
@@ -21028,9 +21031,9 @@ code {
   bottom: 0;
   margin: auto;
   width: 100px;
-  height: 20px;
+  height: 70px;
   text-align: center;
-  font-size: 18px;
+  font-size: 40px;
 }
 .custom-value span {
   display: block;

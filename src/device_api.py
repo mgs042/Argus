@@ -18,6 +18,20 @@ def convert_to_readable_format(timestamp_str, offset_hours=5, offset_minutes=30)
     # Convert to a more readable format (e.g., 2024-12-11 16:15:23)
     return dt.strftime("%Y-%m-%d %H:%M:%S")
 
+def convert_to_ist(utc_timestamp):
+    """
+    Convert a UTC timestamp (in string format) to Indian Standard Time (IST).
+    Add 5 hours and 30 minutes to the UTC time to get IST.
+    """
+    # Parse the UTC timestamp string to a datetime object
+    utc_datetime = datetime.strptime(utc_timestamp, '%Y-%m-%dT%H:%M:%SZ')
+    
+    # Add 5 hours to get IST
+    ist_datetime = utc_datetime + timedelta(hours=5)
+    
+    # Return the IST datetime as a string in the same format
+    return ist_datetime.strftime('%Y-%m-%dT%H:%M:%SZ')
+
 def checkInactive(last_seen_str):
     # Parse the UTC string to a datetime object
     last_seen_time = datetime.fromisoformat(last_seen_str.rstrip('Z')).replace(tzinfo=timezone.utc)
@@ -116,3 +130,57 @@ def get_dev_details(dev_eui):
         return f"gRPC error: {e.code()} - {e.details()}"
     except Exception as ex:
         return f"An unexpected error occurred: {str(ex)}"
+    
+def get_device_metrics(device_id):
+
+    api_token = os.getenv('CHIRPSTACK_APIKEY')
+    chirpstack_server = os.getenv('CHIRPSTACK_SERVER')
+    auth_token = [("authorization", "Bearer %s" % api_token)]
+
+    # Get the current time
+    now = datetime.now()
+
+    # Round down to the last completed hour (e.g., 12:30 -> 12:00)
+    end_time_utc = now.replace(minute=0, second=0, microsecond=0)
+
+    # Start time as 1 hour ago (adjusted to UTC)
+    start_time_utc = end_time_utc - timedelta(hours=7)
+
+    # Convert datetime to Timestamp (Protobuf Timestamp format)
+    start_timestamp = Timestamp()
+    start_timestamp.FromDatetime(start_time_utc)
+
+    end_timestamp = Timestamp()
+    end_timestamp.FromDatetime(end_time_utc)
+
+    # Create the gRPC request
+    req = api.GetDeviceLinkMetricsRequest(
+        dev_eui=device_id,
+        start=start_timestamp,
+        end=end_timestamp,
+        aggregation=0
+    )
+    
+    # Call gRPC service
+    try:
+        with grpc.insecure_channel(chirpstack_server) as channel:
+            client = api.DeviceServiceStub(channel)
+            resp = client.GetLinkMetrics(req, metadata=auth_token)
+            
+        if not resp:
+            print("No data returned for the given time range.")
+            return None
+        print(f"Fetching metrics for device ID: {device_id}")
+        resp_json = json.loads(MessageToJson(resp))
+        for key, value in resp_json.items():
+            if isinstance(value, dict):  # Check for dicts containing timestamps
+                if 'timestamps' in value:
+                    value['timestamps'] = [convert_to_ist(ts) for ts in value['timestamps']]
+        print(resp_json)
+        # Convert gRPC response to JSON format
+        return resp_json
+    
+    except grpc.RpcError as e:
+        # Handle gRPC error (e.g., network issues, invalid response, etc.)
+        print(f"gRPC error: {e.details()}")
+        return None

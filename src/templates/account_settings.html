@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Argus</title>
-    <!-- plugins:css -->
+    <link rel="stylesheet" href="../static/css/device_list.css">
+	<!-- plugins:css -->
     <link rel="stylesheet" href="../static/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="../static/assets/vendors/ti-icons/css/themify-icons.css">
     <link rel="stylesheet" href="../static/assets/vendors/font-awesome/css/font-awesome.min.css">
@@ -33,8 +33,8 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="../static/assets/favicon/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
-  </head>
-  <body>
+</head>
+<body>
     <div class="container-scroller">
       <!-- partial:partials/_sidebar.html -->
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
@@ -163,57 +163,49 @@
         <div class="main-panel">
           <div class="content-wrapper">
             <div class="page-header">
-              <h3 class="page-title"> Device Registration </h3>
+              <h3 class="page-title"> Devices </h3>
             </div>
             <div class="row">
-              <div class="col-md-3"></div>
-              <div class="col-md-6 grid-margin stretch-card">
-                <div class="card">
-                  <div class="card-body">
-                    <h4 class="card-title">Device Form</h4>
-                    <p class="card-description"> Enter Device Details: </p>
-                    <br>
-                    <form class="forms-sample" action="/device_registration" method="POST">
-                      <div class="form-group row">
-                        <label for="name" class="col-sm-3 col-form-label">Device Name: <span class="text-danger">*</span></label>
-                        <div class="col-sm-9">
-                          <input name="name" type="text" class="form-control" id="name" placeholder="Custom Name of Device" required>
+                <div class="col-6 grid-margin stretch-card">
+                  <div class="card">
+                    <div class="config-form">
+                      <h4 class="card-title">Update Account Details</h4>
+                      <p class="card-description"> Enter Account Details: </p>
+                      <br>
+                      <form class="forms-sample" action="/account_settings" method="POST">
+                        <div class="form-group row">
+                          <label for="name" class="col-4 col-form-label">Name:</label>
+                          <div class="col-7">
+                            <input name="name" type="text" class="form-control" id="name" placeholder="Enter your Name" value="{{ user['name'] }}" required>
+                          </div>
                         </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="eui" class="col-sm-3 col-form-label">Device Eui: <span class="text-danger">*</span></label>
-                        <div class="col-sm-9">
-                          <input name="eui" type="text" class="form-control" id="eui" placeholder="Unique EUI of Device" required>
+                        <div class="form-group row">
+                          <label for="email" class="col-4 col-form-label">Email ID:</label>
+                          <div class="col-7">
+                            <input name="email" type="text" class="form-control" id="email" placeholder="Enter your Email" value="{{ user['email'] }}" required>
+                          </div>
                         </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="dev_gw" class="col-sm-3 col-form-label">Device Gateway ID:</label>
-                        <div class="col-sm-9">
-                          <input name="dev_gw" type="text" class="form-control" id="dev_gw" placeholder="Gateway ID of Device">
+                        <div class="form-group row">
+                            <label for="mob" class="col-4 col-form-label">Mob. No:</label>
+                            <div class="col-7">
+                              <input name="mob" type="text" class="form-control" id="mob" placeholder="Enter your Mobile No." value="{{ user['mob'] }}" required>
+                            </div>
                         </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="address" class="col-sm-3 col-form-label">Device Addr:</label>
-                        <div class="col-sm-9">
-                          <input name="address" type="text" class="form-control" id="address" placeholder="Device Address assigned by Chirpstack">
+                        <div class="form-group row">
+                            <label for="username" class="col-4 col-form-label">Username:</label>
+                            <div class="col-7">
+                              <input name="username" type="text" class="form-control" id="username" placeholder="Enter your Username" value="{{ user['username'] }}" required>
+                            </div>
                         </div>
-                      </div>
-                      <div class="form-group row">
-                        <label for="dev_up" class="col-sm-3 col-form-label">Uplink Interval:</label>
-                        <div class="col-sm-9">
-                          <input name="dev_up" type="text" class="form-control" id="dev_up" placeholder="Uplink Interval in seconds">
-                        </div>
-                      </div>
-                      <input type="hidden" id="csrf_token" name="csrf_token">
-                      <button type="submit" class="btn btn-primary me-2 float-end">Submit</button>
-                    </form>
-                  </div>
+                        <input type="hidden" id="csrf_token" name="csrf_token">
+                        <button type="submit" class="btn btn-primary me-2 float-end">Submit</button>
+                      </form>
+                    </div>
                 </div>
-                <div class="col-md-3"></div>
             </div>
-          </div>
+		  
           <!-- content-wrapper ends -->
-          <!-- partial:../../partials/_footer.html -->
+          <!-- partial:partials/_footer.html -->
           <footer class="footer">
             <div class="d-sm-flex justify-content-center justify-content-sm-between">
             </div>
@@ -222,9 +214,11 @@
         </div>
         <!-- main-panel ends -->
       </div>
+	</div>
       <!-- page-body-wrapper ends -->
     </div>
-
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="../static/js/device_list.js"></script>
    <!-- plugins:js -->
    <script src="../static/assets/vendors/js/vendor.bundle.base.js"></script>
    <!-- endinject -->
@@ -234,6 +228,5 @@
    <!-- End plugin js for this page -->
    <script src="../static/js/misc.js"></script>
    <script src="../static/js/off-canvas.js"></script>
-
   </body>
-  </html>
+</html>

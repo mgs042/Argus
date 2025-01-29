@@ -47,6 +47,20 @@ class user_database:
         result = self.cursor.fetchone()
         return result
 
+    def fetch_user_details(self, uid):
+        self.cursor.execute("""
+        SELECT name, email, mob, username FROM user
+        WHERE uid = ?
+        """, (uid, ))
+        result = self.cursor.fetchone()
+        user = {
+            'name': result[0],
+            'email': result[1],
+            'mob': result[2],
+            'username': result[3]
+        }
+        return user
+
     def register_user(self, name, email, mob, username, password):
         check = self.check_user_registered(username)
         if not check:
@@ -63,6 +77,21 @@ class user_database:
                 print(f"Error saving to DB: {e}")
         else:
             return "User Already Registered"
+    
+    def update_user(self, name, email, mob, username, uid):
+        try:
+            self.cursor.execute("""
+            UPDATE user
+            SET name = ?,
+                email = ?,
+                mob = ?,
+                username = ?
+            WHERE uid = ?   
+            """, (name, email, mob, username, uid))
+            self.conn.commit()
+            print("User details Updated")
+        except sqlite3.Error as e:
+            print(f"Error saving to DB: {e}")
     
     def check_credentials(self, username, password):
         if self.check_user_registered(username):
@@ -340,6 +369,15 @@ class device_database:
         result = self.cursor.fetchone()
         return result[0] if result else "Unknown"
     
+    def fetch_device_uid(self, eui):
+        # Fetch device_uid from the database
+        self.cursor.execute("""
+        SELECT uid FROM device
+        WHERE eui = ?
+        """, (eui,))
+        result = self.cursor.fetchone()
+        return result[0] if result else "Unknown"
+    
     # Save device to the database
     def device_write(self, name, eui, gw_id, dev_addr, uplink_interval):
         check=self.check_device_registered(eui)
@@ -422,6 +460,17 @@ class alert_database:
         )
         """)
         self.conn.commit()
+
+    def clear_alert_table(self):
+        # Delete all records from the alert table
+        self.cursor.execute("DELETE FROM alert")
+        
+        # Optionally, reset the auto-increment counter (if you want to start fresh from 1)
+        self.cursor.execute("DELETE FROM sqlite_sequence WHERE name='alert'")
+
+        # Commit changes
+        self.conn.commit()
+
 
     # Check if Alert is the database
     def check_alert_registered(self, eui, issue):
@@ -567,6 +616,17 @@ class gw_alert_database:
         )
         """)
         self.conn.commit()
+
+    def clear_alert_table(self):
+        # Delete all records from the alert table
+        self.cursor.execute("DELETE FROM alert")
+        
+        # Optionally, reset the auto-increment counter (if you want to start fresh from 1)
+        self.cursor.execute("DELETE FROM sqlite_sequence WHERE name='alert'")
+
+        # Commit changes
+        self.conn.commit()
+
 
     # Check if Alert is the database
     def check_alert_registered(self, eui, issue):

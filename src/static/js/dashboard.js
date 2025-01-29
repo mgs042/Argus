@@ -6,6 +6,22 @@
   }
 
   $(function() {
+     // Function to get the current date and time in the desired format
+     function getCurrentDateTime() {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const month = monthNames[now.getMonth()];
+      const year = now.getFullYear();
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // The hour '0' should be '12'
+
+      return `${day} ${month} ${year}, ${hours}:${minutes}${ampm}`;
+    }
+
 
     // Function to create a dynamic alert card
     function createAlertCard(device, issue, severity, uid, isGW = false) {
@@ -66,20 +82,22 @@
         $(containerId).append(rowHtml);  // Append the row to the container
       });
     }
-    console.log(gw_alerts)
-    // Dynamically add alerts to containers
-    if (gw_alerts && gw_alerts.length) {
-      addRowsToContainer(gw_alerts, '#dynamic-rows1', true);  // Add Gateway Alerts to container
-    }
-
-    if (alerts && alerts.length) {
-      addRowsToContainer(alerts, '#dynamic-rows2');  // Add Device Alerts to container
-    }
-
+    // Store chart instances in a map (key: canvasId, value: chart instance)
+    const chartInstances = new Map();
     // Doughnut Charts for device and gateway statuses
     function createDoughnutChart(canvasId, data) {
       const doughnutChartCanvas = document.getElementById(canvasId);
-      new Chart(doughnutChartCanvas, {
+
+      // Check if there is an existing chart instance for this canvasId
+      if (chartInstances.has(canvasId)) {
+        const existingChart = chartInstances.get(canvasId);
+        existingChart.destroy(); // Destroy the existing chart
+        chartInstances.delete(canvasId); // Remove the reference from the map
+        console.log('Destroyed existing chart for canvas:', canvasId);
+      }
+
+      // Create a new chart instance
+      const newChart = new Chart(doughnutChartCanvas, {
         type: 'doughnut',
         data: {
           labels: ["Offline", "Online", "Never Seen"],
@@ -101,9 +119,6 @@
           responsive: true,
           maintainAspectRatio: true,
           showScale: false,
-          legend: {
-            display: false,
-          },
           plugins: {
             legend: {
               display: false,
@@ -111,31 +126,64 @@
           },
         },
       });
+
+      // Store the new chart instance in the map
+      chartInstances.set(canvasId, newChart);
+      console.log('Created new chart for canvas:', canvasId);
     }
-
-    // Create charts for device and gateway statuses
-    createDoughnutChart('devices_donut', [d_status.offline, d_status.online, d_status.never_seen]);
-    createDoughnutChart('gateways_donut', [g_status.offline, g_status.online, g_status.never_seen]);
-
-    // Function to get the current date and time in the desired format
-    function getCurrentDateTime() {
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const month = monthNames[now.getMonth()];
-      const year = now.getFullYear();
-      let hours = now.getHours();
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      hours = hours % 12;
-      hours = hours ? hours : 12; // The hour '0' should be '12'
-
-      return `${day} ${month} ${year}, ${hours}:${minutes}${ampm}`;
+   // Fetch data from the endpoints
+   async function fetchData(url) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error(`Failed to fetch data from ${url}:`, error);
+      return [];
     }
+  }
+  function updateStatusAndAlerts() {
+    // Fetch and dynamically populate Gateway Alerts
+    fetchData('/gateway_alerts').then(gwAlerts => {
+      if (gwAlerts && gwAlerts.length) {
+        console.log(gwAlerts)
+        addRowsToContainer(gwAlerts, '#dynamic-rows1', true);
+      }
+    });
 
-    // Update datetime on page load
-    $('#datetime1').text(getCurrentDateTime());
-    $('#datetime2').text(getCurrentDateTime());
+    // Fetch and dynamically populate Device Alerts
+    fetchData('/device_alerts').then(alerts => {
+      if (alerts && alerts.length) {
+        console.log(alerts)
+        addRowsToContainer(alerts, '#dynamic-rows2');
+      }
+    });
+
+    // Fetch and dynamically create Doughnut Charts
+    fetchData('/status_data').then(statusData => {
+      console.log(statusData)
+      if (statusData && statusData.devices && statusData.gateways) {
+        createDoughnutChart('devices_donut', [
+          statusData.devices.offline,
+          statusData.devices.online,
+          statusData.devices.never_seen
+        ]);
+        createDoughnutChart('gateways_donut', [
+          statusData.gateways.offline,
+          statusData.gateways.online,
+          statusData.gateways.never_seen
+        ]);
+        $('.device_count').text(statusData.devices.total)
+        $('.gateway_count').text(statusData.gateways.total)
+        // Update datetime on page load
+        $('#datetime1').text(getCurrentDateTime());
+        $('#datetime2').text(getCurrentDateTime());
+      }
+      
+    });
+  }
+  updateStatusAndAlerts();
+  setInterval(updateStatusAndAlerts, 300000)
 
   });
 
