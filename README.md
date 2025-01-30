@@ -36,6 +36,7 @@
     - **Celery Beat** (For periodic tasks)
     - **Celery Workers** (For handling background tasks, scalable based on network traffic)
 - **Scalability**: The Celery workers can be scaled up based on the traffic load and network size, allowing for high availability and better performance in large-scale networks.
+- **Telegram**: Can choose to recieve alerts via a custom **Telegram Bot**.
 
 ---
 
@@ -88,7 +89,7 @@ Argus uses **Docker Compose** to manage multiple containers. Follow the steps be
 
     - **Default Username**: admin
     - **Defualt Password**: admin1234
-6. Check if all the necessary components are up and running, and make changes to the configuration as necessary.
+6. Check if all the necessary components are up and running.
 ---
 ### **3. Scale Celery Workers**
 
@@ -101,13 +102,21 @@ docker-compose scale celery-worker=5
 This will start 5 Celery worker containers. You can adjust the number based on the load and the size of the network.
 
 ---
+### **4. Configure**
+8. Configure **Argus** to recieve event updates from a **Chirpstack server** by providing:
+    - **IP Address**
+    - **Port**
+    - **All Access API key**
+7. Optionally, configure to recieve alerts via Telegram by creating a Telegram Bot and Chat (see [this](https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a)).
+
+---
 
 ## **Usage**
 
 - **Monitor Network Resources**: Argus keeps track of all IoT devices and gateways in the network. It monitors device status, resource usage, and metrics, providing real-time insights into network health and security.
 - **Threat Detection**: Argus continuously monitors for potential IoT security threats. When a threat is detected, alerts are generated, and corresponding actions are logged for further analysis.
 - **Device Status Monitoring**: Argus integrates with the Chirpstack API to fetch device status (active or inactive) and track device metrics like frame count, packet loss, and more.
-- **Alert Notifications**: When threats are detected or device status changes, Argus sends real-time notifications via the dashboard, email, or SMS. **(Work in Progress)**
+- **Alert Notifications**: When threats are detected or device status changes, Argus sends real-time notifications via the dashboard, email, or telegram. **(Work in Progress)**
 
 ---
 
