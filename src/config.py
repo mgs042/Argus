@@ -216,22 +216,20 @@ def check_telegram_status(botId, chatId):
     """
     results = {
         "botId": botId,
-        "chatId": port,
-        "server_health": {"reachable": None, "details": None},
+        "chatId": chatId,
+        "validity": None,
+        "details": None
     }
 
-    # Check server health using the /api/health endpoint
     try:
-        
-        ip = server_url.split(':')
-        health_response = requests.get(f"http://{ip[0]}:15672/api/health/checks/alarms", auth=HTTPBasicAuth(username, password), timeout=5)
+        telegram_response = requests.get(f"https://api.telegram.org/bot{botId}/sendMessage?chat_id={chatId}&text=Test+Message", timeout=5)
 
-        if health_response.status_code != 200:
-            results["server_health"]["reachable"] = False
-            results["server_health"]["details"] = health_response.json()
+        if telegram_response.status_code != 200:
+            results['validity'] = False
+            results["details"] = telegram_response.json()['description']
         else:
-            results["server_health"]["reachable"] = True
-            results["server_health"]["details"] = "RabbitMQ is healthy."
+            results['validity'] = True
+            results["details"] = "Telegram is configured correctly"
     except requests.RequestException as e:
         e = list(str(e.__class__.__name__))
         error=""+e[0]
@@ -240,8 +238,8 @@ def check_telegram_status(botId, chatId):
                 error+=(" "+e[i])
             else:
                 error+=e[i]
-        results["server_health"]["reachable"] = False
-        results["server_health"]["details"] = error
+        results['validity'] = False
+        results["details"] = error
     return results
 
 def set_env_vars():

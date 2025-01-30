@@ -193,13 +193,13 @@
                         </div>
                       </div>
                       <div class="form-group row">
-                        <label for="bot_id" class="col-4 col-form-label">Telegram Bot ID</label>
+                        <label for="bot_id" class="col-4 col-form-label">Telegram Bot ID: </label>
                         <div class="col-7">
                           <input name="bot_id" type="password" class="form-control" id="bot_id" placeholder="Bot ID" value="{{ telegram_status['botId'] }}">
                         </div>
                       </div>
                       <div class="form-group row">
-                        <label for="chat_id" class="col-4 col-form-label">Telegram Chat ID</label>
+                        <label for="chat_id" class="col-4 col-form-label">Telegram Chat ID: </label>
                         <div class="col-7">
                           <input name="chat_id" type="password" class="form-control" id="chat_id" placeholder="Chat ID" value="{{ telegram_status['chatId'] }}">
                         </div>
@@ -247,6 +247,11 @@
                           {{ rabbitmq_status['server_health']['details'] }}
                       </span>
                   </p>
+                  <p><span class="key">Telegram:</span> 
+                    <span class="value {% if telegram_status['validity'] == False %} text-danger {% endif %}">
+                        {{ telegram_status['details'] }}
+                    </span>
+                </p>
               </div>
               <div class="col-1"></div>
             </div>

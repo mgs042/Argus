@@ -1,5 +1,5 @@
 import os
-from config import set_env_vars, check_chirpstack_server_and_api, check_influxdb_server_auth_and_resources, check_rabbitmq_server, check_config, set_config_file
+from config import set_env_vars, check_chirpstack_server_and_api, check_influxdb_server_auth_and_resources, check_rabbitmq_server, check_config, set_config_file, check_telegram_status
 set_env_vars()
 from flask import Flask, request, Response, render_template, jsonify, redirect, url_for, make_response, flash
 from flask_cors import CORS

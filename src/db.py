@@ -1,6 +1,8 @@
 import sqlite3
 import uuid
 import bcrypt
+from telegram_bot import send_telegram_alert
+import asyncio
 
 class user_database:
     db_file = "user.db"
@@ -514,6 +516,12 @@ class alert_database:
                 VALUES (?, ?, ?, ?, ?, ?)
                 """, (name, eui, issue, message, severity, unique_id))
                 self.conn.commit()
+                asyncio.run(send_telegram_alert(f''' 🔴🔴🔴🔴<b><u> Device Alert </u></b>🔴🔴🔴🔴
+➡<b> Name:</b> {name}
+➡<b> EUI:</b> {eui}
+➡<b> Issue:</b> {issue}
+➡<b> Description:</b> {message}
+➡<b> Severity:</b> {severity}'''))
                 return f"Alert Registered - {name} - {issue} - {message}"
             except sqlite3.Error as e:
                 print(f"Error saving to DB: {e}")
@@ -670,6 +678,12 @@ class gw_alert_database:
                 VALUES (?, ?, ?, ?, ?, ?)
                 """, (name, eui, issue, message, severity, unique_id))
                 self.conn.commit()
+                asyncio.run(send_telegram_alert(f''' ❗❗❗❗<b><u> Gateway Alert </u></b>❗❗❗❗
+➡<b> Name:</b> {name}
+➡<b> EUI:</b> {eui}
+➡<b> Issue:</b> {issue}
+➡<b> Description:</b> {message}
+➡<b> Severity:</b> {severity}'''))
                 return f"GW-Alert Registered - {name} - {issue} - {message}"
             except sqlite3.Error as e:
                 print(f"Error saving to DB: {e}")
