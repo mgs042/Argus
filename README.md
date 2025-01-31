@@ -1,8 +1,5 @@
-<div align="center">
-  <img src='/src/static/assets/images/eye.png' alt='Logo' style='width:100px; border-radius:50px;'>
-  <img src="https://github.com/user-attachments/assets/929f6ab6-28d8-4da1-8184-565eba1d73c8" alt="Title">
-</div>
-<hr style='height: 5px;'>
+![Logo](/src/static/assets/images/eye.png "Argus Logo"){width=100px}
+![Title](https://github.com/user-attachments/assets/929f6ab6-28d8-4da1-8184-565eba1d73c8 "Title Text")
 
 **IoT Security Monitoring and Resource Management Tool**
 
