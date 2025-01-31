@@ -5,6 +5,7 @@ from chirpstack_api import api
 from google.protobuf.json_format import MessageToJson
 from datetime import datetime, timedelta
 from google.protobuf.timestamp_pb2 import Timestamp
+from log import logger
 
 def convert_to_ist(utc_timestamp):
     """
@@ -152,19 +153,18 @@ def get_gateway_metrics(gateway_id):
             resp = client.GetMetrics(req, metadata=auth_token)
             
         if not resp:
-            print("No data returned for the given time range.")
+            logger.info("No data returned for the given time range.")
             return None
-        print(f"Fetching metrics for gateway ID: {gateway_id}")
+        logger.info(f"Fetching metrics for gateway ID: {gateway_id}")
         resp_json = json.loads(MessageToJson(resp))
         for key, value in resp_json.items():
             if isinstance(value, dict):  # Check for dicts containing timestamps
                 if 'timestamps' in value:
                     value['timestamps'] = [convert_to_ist(ts) for ts in value['timestamps']]
-        print(resp_json)
         # Convert gRPC response to JSON format
         return resp_json
     
     except grpc.RpcError as e:
         # Handle gRPC error (e.g., network issues, invalid response, etc.)
-        print(f"gRPC error: {e.details()}")
+        logger.error(f"gRPC error: {e.details()}")
         return None

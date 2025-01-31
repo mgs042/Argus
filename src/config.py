@@ -4,6 +4,7 @@ import requests
 import grpc
 from chirpstack_api import api
 from requests.auth import HTTPBasicAuth
+from log import logger
 
 
 # Path to your JSON configuration file
@@ -252,12 +253,12 @@ def set_env_vars():
         for key, value in config.items():
             os.environ[key] = str(value)  # Convert value to string if not already
 
-        print("Environment variables set successfully.")
+        logger.info("Environment variables set successfully.")
 
     except FileNotFoundError:
-        print(f"Configuration file '{CONFIG_FILE}' not found.")
+        logger.error(f"Configuration file '{CONFIG_FILE}' not found.")
     except json.JSONDecodeError as e:
-        print(f"Error parsing JSON: {e}")
+        logger.error(f"Error parsing JSON: {e}")
 
 def check_config():
     try:
@@ -280,8 +281,8 @@ def check_config():
         return True
         
     except FileNotFoundError:
-        print(f"Configuration file '{CONFIG_FILE}' not found.")
+        logger.info(f"Configuration file '{CONFIG_FILE}' not found.")
         return False
     except json.JSONDecodeError as e:
-        print(f"Error parsing JSON: {e}")
+        logger.error(f"Error parsing JSON: {e}")
         return False

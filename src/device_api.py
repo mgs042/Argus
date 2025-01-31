@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 import json
 import os
 from application_api import get_application_list
+from log import logger
 
 def convert_to_readable_format(timestamp_str, offset_hours=5, offset_minutes=30):
     # Parse the ISO 8601 timestamp (e.g., 2024-12-11T10:34:23.225809Z)
@@ -168,19 +169,18 @@ def get_device_metrics(device_id):
             resp = client.GetLinkMetrics(req, metadata=auth_token)
             
         if not resp:
-            print("No data returned for the given time range.")
+            logger.info("No data returned for the given time range.")
             return None
-        print(f"Fetching metrics for device ID: {device_id}")
+        logger.info(f"Fetching metrics for device ID: {device_id}")
         resp_json = json.loads(MessageToJson(resp))
         for key, value in resp_json.items():
             if isinstance(value, dict):  # Check for dicts containing timestamps
                 if 'timestamps' in value:
                     value['timestamps'] = [convert_to_ist(ts) for ts in value['timestamps']]
-        print(resp_json)
         # Convert gRPC response to JSON format
         return resp_json
     
     except grpc.RpcError as e:
         # Handle gRPC error (e.g., network issues, invalid response, etc.)
-        print(f"gRPC error: {e.details()}")
+        logger.error(f"gRPC error: {e.details()}")
         return None

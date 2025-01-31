@@ -93,7 +93,6 @@
         const existingChart = chartInstances.get(canvasId);
         existingChart.destroy(); // Destroy the existing chart
         chartInstances.delete(canvasId); // Remove the reference from the map
-        console.log('Destroyed existing chart for canvas:', canvasId);
       }
 
       // Create a new chart instance
@@ -129,7 +128,6 @@
 
       // Store the new chart instance in the map
       chartInstances.set(canvasId, newChart);
-      console.log('Created new chart for canvas:', canvasId);
     }
    // Fetch data from the endpoints
    async function fetchData(url) {
@@ -146,7 +144,6 @@
     // Fetch and dynamically populate Gateway Alerts
     fetchData('/gateway_alerts').then(gwAlerts => {
       if (gwAlerts && gwAlerts.length) {
-        console.log(gwAlerts)
         addRowsToContainer(gwAlerts, '#dynamic-rows1', true);
       }
     });
@@ -154,14 +151,12 @@
     // Fetch and dynamically populate Device Alerts
     fetchData('/device_alerts').then(alerts => {
       if (alerts && alerts.length) {
-        console.log(alerts)
         addRowsToContainer(alerts, '#dynamic-rows2');
       }
     });
 
     // Fetch and dynamically create Doughnut Charts
     fetchData('/status_data').then(statusData => {
-      console.log(statusData)
       if (statusData && statusData.devices && statusData.gateways) {
         createDoughnutChart('devices_donut', [
           statusData.devices.offline,

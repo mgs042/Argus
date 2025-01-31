@@ -1,4 +1,3 @@
-console.log(deviceUid)
 
 // Global label-to-color mapping
 const labelColorMap = {};
@@ -20,7 +19,6 @@ else{
 fetch(`/device_metrics?uid=${deviceUid}`)
 .then(response => response.json())
 .then(data => {
-    console.log(data)
     const chartData = [
         { id: "rxPackets", data: data.rxPackets },
         { id: "rssi", data: data.gwRssi },
@@ -29,7 +27,6 @@ fetch(`/device_metrics?uid=${deviceUid}`)
         { id: "rxPacketsPerDr", data: data.rxPacketsPerDr },
         { id: "errors", data: data.errors }
     ];
-    console.log(chartData)
     chartData.forEach(chart => {
         const container = document.getElementById(chart.id);
 

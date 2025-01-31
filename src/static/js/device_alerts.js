@@ -2,7 +2,6 @@
   'use strict';
 
   $(function () {
-    console.log('Alerts:', alerts);
 
     // Function to create a dynamic alert card
     function createAlertCard(device, gateway, issue, message, severity, uid) {

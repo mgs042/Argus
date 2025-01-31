@@ -18,7 +18,7 @@ from flask_jwt_extended import (JWTManager, jwt_required, get_jwt_identity,
                                 create_access_token, create_refresh_token, 
                                 set_access_cookies, set_refresh_cookies, 
                                 unset_jwt_cookies,unset_access_cookies)
-
+from log import logger
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app)  # Enable CORS for all routes
@@ -231,7 +231,7 @@ def change_pass():
                 check, uid = db.check_credentials(username, u_old_password)
                 if check:
                     db.update_password(uid, u_password)
-                    print('Password Updated Successfully')
+                    logger.info('Password Updated Successfully')
                 else:
                     flash("Incorrect Old Password")
                     return redirect(url_for('change_pass'))
@@ -497,7 +497,7 @@ def data():
             update_influx.apply_async(args=[metrics_data, coordinates, device_addr])
             
         except Exception as e:
-            print(f"Error updating metrics: {e}")
+            logger.error(f"Error updating metrics: {e}")
             return '', 500  # Internal Server Error
     elif event_type == 'join':
         #Recieve and process JSON data
@@ -508,7 +508,7 @@ def data():
         with device_database() as db:
             if db.check_device_registered(device_id):
                 with alert_database() as db2:
-                    print(db2.alert_write(device_name, device_id, "Join Request Replay", f"{device_name} has already joined before", 'critical'))
+                    logger.info(db2.alert_write(device_name, device_id, "Join Request Replay", f"{device_name} has already joined before", 'critical'))
             else:
                 db.device_write(device_name, device_id, "Unknown", device_addr, 60)
     elif event_type == 'status':
@@ -521,14 +521,14 @@ def data():
         battery_status = data.get('batteryLevel', 'Unknown')
         if margin > 20:
             with alert_database() as db:
-                print(db.alert_write(device_name, device_id, "High Link Margin", f'{device_name} has a high margin value of {margin}', 'low'))
+                logger.info(db.alert_write(device_name, device_id, "High Link Margin", f'{device_name} has a high margin value of {margin}', 'low'))
         elif margin < 5:
             with alert_database() as db:
-                print(db.alert_write(device_name, device_id, "Low Link Margin", f'{device_name} has a low margin value of {margin}', 'critical'))
+                logger.info(db.alert_write(device_name, device_id, "Low Link Margin", f'{device_name} has a low margin value of {margin}', 'critical'))
         
         if (not battery_level_unavailable) and battery_status < 10:
             with alert_database() as db:
-                print(db.alert_write(device_name, device_id, "Low Battery", f'{device_name} has a low battery level of {battery_status}', 'critical'))
+                logger.info(db.alert_write(device_name, device_id, "Low Battery", f'{device_name} has a low battery level of {battery_status}', 'critical'))
     elif event_type == 'log':
          #Recieve and process JSON data
         data = request.get_json()
@@ -597,7 +597,7 @@ def data():
                     description = 'Unknown'
 
         with alert_database() as db:
-            print(db.alert_write(device_id, device_name, issue, description, severity))
+            logger.info(db.alert_write(device_id, device_name, issue, description, severity))
     elif event_type == 'location':
         #Recieve and process JSON data
         data = request.get_json()
@@ -620,14 +620,14 @@ def data():
                 with gateway_database() as db:
                     db.set_gateway_coord(gateway_id, f'{lat},{long},{alt}')
                 with gw_alert_database() as db:
-                    print(db.alert_write(gateway_name, gateway_id, 'Gateway Location Changed', f'Location of {gateway_name} has changed by ({lat-location['latitude']}, {long-location['longitude']}, {alt-location['altitude']})', 'critical'))
+                    logger.info(db.alert_write(gateway_name, gateway_id, 'Gateway Location Changed', f'Location of {gateway_name} has changed by ({lat-location['latitude']}, {long-location['longitude']}, {alt-location['altitude']})', 'critical'))
             if gateway_location is None:
                 try:
                     gateway_location = rev_geocode(location['latitude'], location['longitude'], metrics_data.get(gateway_id))
                     with gateway_database() as db:
                         db.set_gateway_address(gateway_id, gateway_location)
                 except KeyError as e:
-                    print(f"KeyError encountered: {e}")
+                    logger.error(f"KeyError encountered: {e}")
 
 
 

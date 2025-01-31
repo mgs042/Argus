@@ -5,6 +5,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from db import gateway_database, device_database, alert_database, gw_alert_database
 from location import rev_geocode
 from influx import get_influxdb_client
+from log import logger
 
 
 
@@ -54,7 +55,7 @@ def update_influx(metrics_data, coordinates, device_addr):
     snr = metrics_data.get('snr', 0)
     f_cnt = metrics_data.get('f_cnt', -1)
     if f_cnt == 0:
-        print("Frame-Count Reset")
+        logger.info("Frame-Count Reset")
         with alert_database() as db:
             db.alert_write(device_name, device_id, "Device Reset", "Frame Count is reset to 0", 'critical')
     with gateway_database() as db:
@@ -70,10 +71,10 @@ def update_influx(metrics_data, coordinates, device_addr):
                     pass
                 elif not db1.check_device_addr(device_id):
                     db1.set_dev_addr(device_id, device_addr)
-                    print("Device Address Recorded: "+device_name+" --> "+device_addr)
+                    logger.info("Device Address Recorded: "+device_name+" --> "+device_addr)
                 elif not db1.check_device_gw(device_id):
                     db1.set_dev_gw(device_id, gateway_id)
-                    print("Device Gateway Recorded: "+device_name+" --> "+gateway_name)
+                    logger.info("Device Gateway Recorded: "+device_name+" --> "+gateway_name)
             if coordinates != {}:
                 if lat == '' and long == '' and alt == '':
                      with gateway_database() as db:
@@ -82,20 +83,20 @@ def update_influx(metrics_data, coordinates, device_addr):
                     with gateway_database() as db:
                         db.set_gateway_coord(gateway_id, f'{lat},{long},{alt}')
                     with gw_alert_database() as db:
-                        print(db.alert_write(gateway_name, gateway_id, 'Gateway Location Changed', f'Location of {gateway_name} has changed by ({lat-coordinates['latitude']}, {long-coordinates['longitude']}, {alt-coordinates['altitude']})', 'critical'))
+                        logger.info(db.alert_write(gateway_name, gateway_id, 'Gateway Location Changed', f'Location of {gateway_name} has changed by ({lat-coordinates['latitude']}, {long-coordinates['longitude']}, {alt-coordinates['altitude']})', 'critical'))
                 if gateway_location is None:
                     try:
                         gateway_location = rev_geocode(coordinates['latitude'], coordinates['longitude'], metrics_data.get(gateway_id))
                         with gateway_database() as db:
                             db.set_gateway_address(gateway_id, gateway_location)
                     except KeyError as e:
-                        print(f"KeyError encountered: {e}")
+                        logger.error(f"KeyError encountered: {e}")
             try:
                 p = influxdb_client.Point("uplink_metrics").tag("device_id", device_id).tag("gateway_id", gateway_id).field("f_cnt", f_cnt).field("rssi", rssi).field("snr", snr)
                 write_api.write(bucket=bucket, org=org, record=p)
 
                 
-                print(f"Simulating database update for: {metrics_data}")
+                logger.info(f"Simulating database update for: {metrics_data}")
                 return "Metrics and database updated successfully"
             
             except Exception as e:
@@ -131,7 +132,7 @@ def dev_packet_rate_task():
     for interval in uplink_interval:
         if packet_rate[interval[1]] == 0:
             with alert_database() as db:
-                print(db.alert_write(interval[0], interval[1], 'Offline', 'No packets were sent in the last 15min', 'high'))
+                logger.info(db.alert_write(interval[0], interval[1], 'Offline', 'No packets were sent in the last 15min', 'high'))
                 continue
         else:
             with alert_database() as db:
@@ -139,13 +140,13 @@ def dev_packet_rate_task():
                         db.remove_alert(interval[1], "Offline")
         if packet_rate[interval[1]] < (900//interval[2]):
             with alert_database() as db:
-                print(db.alert_write(interval[0], interval[1], "Packet Loss", f'{packet_rate[interval[1]]} Packets Recieved in the Last 15min', 'medium'))
+                logger.info(db.alert_write(interval[0], interval[1], "Packet Loss", f'{packet_rate[interval[1]]} Packets Recieved in the Last 15min', 'medium'))
         elif packet_rate[interval[1]] > (900//interval[2]):
             with alert_database() as db:
-                print(db.alert_write(interval[0], interval[1], "Packet Flooding", f'{packet_rate[interval[1]]} Packets Recieved in the Last 15min', 'high'))
+                logger.info(db.alert_write(interval[0], interval[1], "Packet Flooding", f'{packet_rate[interval[1]]} Packets Recieved in the Last 15min', 'high'))
         else:
             with alert_database() as db:
-                print("Packet Rate Optimum for " + interval[0])
+                logger.info("Packet Rate Optimum for " + interval[0])
                 if db.check_alert_registered(interval[1], "Packet Loss"):
                     db.remove_alert(interval[1], "Packet Loss")
                 elif db.check_alert_registered(interval[1], "Packet Flooding"):
@@ -178,7 +179,7 @@ def dev_signal_strength_task():
                     count += 1
                 if count == 0:
                     with alert_database() as db:
-                        print(db.alert_write(device[1], device[2], 'Offline', 'No packets were sent in the last 1hr', 'high'))
+                        logger.info(db.alert_write(device[1], device[2], 'Offline', 'No packets were sent in the last 1hr', 'high'))
                         continue
                 else:
                     with alert_database() as db:
@@ -188,10 +189,10 @@ def dev_signal_strength_task():
 
         if signal_values["avg_rssi"] is not None and signal_values["avg_rssi"] < 100:
             with alert_database() as db:
-                print(db.alert_write(device[1], device[2], "Threshold Breach - RSSI", f'Average RSSI value is {signal_values["avg_rssi"]} in the last 1hr', 'medium'))
+                logger.info(db.alert_write(device[1], device[2], "Threshold Breach - RSSI", f'Average RSSI value is {signal_values["avg_rssi"]} in the last 1hr', 'medium'))
         if signal_values["avg_snr"] is not None and signal_values["avg_snr"]< 100:
             with alert_database() as db:
-                print(db.alert_write(device[1], device[2], "Threshold Breach - SNR", f'Average SNR value is {signal_values["avg_snr"]} in the last 1hr', 'high'))
+                logger.info(db.alert_write(device[1], device[2], "Threshold Breach - SNR", f'Average SNR value is {signal_values["avg_snr"]} in the last 1hr', 'high'))
 
 
 
@@ -230,7 +231,7 @@ def gw_packet_rate_task():
             count += (3600//interval[0])
         if packet_rate[gateway[2]] == 0:
             with gw_alert_database() as db:
-                print(db.alert_write(gateway[1], gateway[2], 'Offline', 'No packets were sent in the last 15min', 'high'))
+                logger.info(db.alert_write(gateway[1], gateway[2], 'Offline', 'No packets were sent in the last 15min', 'high'))
                 continue
         else:
             with gw_alert_database() as db:
@@ -238,13 +239,13 @@ def gw_packet_rate_task():
                         db.remove_alert(gateway[2], "Offline")
         if packet_rate[gateway[2]] < count:
             with gw_alert_database() as db:
-                print(db.alert_write(gateway[1], gateway[2], "Packet Loss", f'{packet_rate[gateway[2]]} Packets Recieved in the Last 15min', 'medium'))
+                logger.info(db.alert_write(gateway[1], gateway[2], "Packet Loss", f'{packet_rate[gateway[2]]} Packets Recieved in the Last 15min', 'medium'))
         elif packet_rate[gateway[2]] > count:
             with gw_alert_database() as db:
-                print(db.alert_write(gateway[1], gateway[2], "Packet Flooding", f'{packet_rate[gateway[2]]} Packets Recieved in the Last 15min', 'high'))
+                logger.info(db.alert_write(gateway[1], gateway[2], "Packet Flooding", f'{packet_rate[gateway[2]]} Packets Recieved in the Last 15min', 'high'))
         else:
             with gw_alert_database() as db:
-                print("Packet Rate Optimum for " + gateway[1])
+                logger.info("Packet Rate Optimum for " + gateway[1])
                 if db.check_alert_registered(gateway[2], "Packet Loss"):
                     db.remove_alert(gateway[2], "Packet Loss")
                 elif db.check_alert_registered(gateway[2], "Packet Flooding"):
@@ -277,7 +278,7 @@ def gw_signal_strength_task():
                     count += 1
                 if count == 0:
                     with gw_alert_database() as db:
-                        print(db.alert_write(gateway[1], gateway[2], 'Offline', 'No packets were sent in the last 1hr', 'high'))
+                        logger.info(db.alert_write(gateway[1], gateway[2], 'Offline', 'No packets were sent in the last 1hr', 'high'))
                         continue
                 else:
                     with gw_alert_database() as db:
@@ -286,7 +287,7 @@ def gw_signal_strength_task():
                 signal_values[record.get_field()] = sum/count
         if signal_values["avg_rssi"] is not None and signal_values["avg_rssi"] < 100:
             with gw_alert_database() as db:
-                print(db.alert_write(gateway[1], gateway[2], "Threshold Breach - RSSI", f'Average RSSI value is {signal_values["avg_rssi"]} in the last 1hr', 'medium'))
+                logger.info(db.alert_write(gateway[1], gateway[2], "Threshold Breach - RSSI", f'Average RSSI value is {signal_values["avg_rssi"]} in the last 1hr', 'medium'))
         if signal_values["avg_snr"] is not None and signal_values["avg_snr"]< 100:
             with gw_alert_database() as db:
-                print(db.alert_write(gateway[1], gateway[2], "Threshold Breach - SNR", f"Average SNR value is {signal_values["avg_snr"]} in the last 1hr", 'high'))
+                logger.info(db.alert_write(gateway[1], gateway[2], "Threshold Breach - SNR", f"Average SNR value is {signal_values["avg_snr"]} in the last 1hr", 'high'))

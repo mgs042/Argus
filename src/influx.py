@@ -1,5 +1,6 @@
 from influxdb_client import InfluxDBClient
 import os
+from log import logger
 
 def get_influxdb_client():
     try:
@@ -14,5 +15,5 @@ def get_influxdb_client():
         client = InfluxDBClient(url=influxdb_url, token=influxdb_token, org=influxdb_org, timeout=30000)
         return client, influxdb_bucket, influxdb_org
     except Exception as e:
-        print(f"Error connecting to InfluxDB: {e}")
+        logger.error(f"Error connecting to InfluxDB: {e}")
         raise

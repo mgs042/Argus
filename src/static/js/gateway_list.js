@@ -70,7 +70,6 @@ $(document).ready(function () {
     $.getJSON('/gateway_data', function (data) {
         const tableContent = $('.table-content'); // Target the table content container
         tableContent.empty(); // Clear existing rows
-        console.log(data)
         // Loop through JSON data and create table rows dynamically
         data.forEach(row => {
             const html = `

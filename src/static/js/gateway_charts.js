@@ -1,4 +1,3 @@
-console.log(gatewayUid)
 
 // Global label-to-color mapping
 const labelColorMap = {};

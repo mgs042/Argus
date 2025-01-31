@@ -93,13 +93,7 @@ Argus uses **Docker Compose** to manage multiple containers. Follow the steps be
 ---
 ### **3. Scale Celery Workers**
 
-The number of Celery workers can be scaled depending on the network traffic. To scale the number of Celery workers, use the following command:
-
-```bash
-docker-compose scale celery-worker=5
-```
-
-This will start 5 Celery worker containers. You can adjust the number based on the load and the size of the network.
+The number of Celery workers can be scaled depending on the network traffic. To scale the number of Celery workers, use the **scale** attribute of the **celery-worker service** in the **docker-compose.yml**. You can adjust the number based on the load and the size of the network.
 
 ---
 ### **4. Configure**
@@ -110,6 +104,11 @@ This will start 5 Celery worker containers. You can adjust the number based on t
 7. Optionally, configure to recieve alerts via Telegram by creating a Telegram Bot and Chat (see [this](https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a)).
 
 ---
+### **5. Register the Devices and Gateways
+8. Provide the gateway and device details to allow Argus to monitor it.
+
+---
+
 
 ## **Usage**
 

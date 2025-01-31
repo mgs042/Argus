@@ -2,7 +2,7 @@ import sqlite3
 import uuid
 import bcrypt
 from telegram_bot import send_telegram_alert
-import asyncio
+from log import logger
 
 class user_database:
     db_file = "user.db"
@@ -74,9 +74,9 @@ class user_database:
                 VALUES (?, ?, ?, ?, ?, ?)
                 """, (name, email, mob, username, password_hash, unique_id))
                 self.conn.commit()
-                print("User Regisered")
+                logger.info(f"User Regisered -- {username}")
             except sqlite3.Error as e:
-                print(f"Error saving to DB: {e}")
+                logger.error(f"Error saving to DB: {e}")
         else:
             return "User Already Registered"
     
@@ -91,9 +91,9 @@ class user_database:
             WHERE uid = ?   
             """, (name, email, mob, username, uid))
             self.conn.commit()
-            print("User details Updated")
+            logger.info(f"User details Updated -- {username}")
         except sqlite3.Error as e:
-            print(f"Error saving to DB: {e}")
+            logger.error(f"Error saving to DB: {e}")
 
     def update_password(self, uid, password):
         try:
@@ -104,9 +104,9 @@ class user_database:
             WHERE uid = ?   
             """, (password_hash, uid))
             self.conn.commit()
-            print("Password Updated")
+            logger.info(f"Password Updated -- {uid}")
         except sqlite3.Error as e:
-            print(f"Error saving to DB: {e}")
+            logger.error(f"Error saving to DB: {e}")
     
     def check_credentials(self, username, password):
         if self.check_user_registered(username):
@@ -125,7 +125,6 @@ class user_database:
         if self.conn:
             self.cursor.close()
             self.conn.close()
-            print("User Database connection closed.")
 
     def __enter__(self):
         return self
@@ -223,7 +222,7 @@ class gateway_database:
             """, (location, eui)) 
             self.conn.commit()  # Commit the changes to the database
         except sqlite3.Error as e:
-            print(f"Error saving to DB: {e}")
+            logger.error(f"Error saving to DB: {e}")
 
     #Set gateway coordinates
     def set_gateway_coord(self, eui, coordinates):
@@ -235,7 +234,7 @@ class gateway_database:
             """, (coordinates, eui)) 
             self.conn.commit()  # Commit the changes to the database
         except sqlite3.Error as e:
-            print(f"Error saving to DB: {e}")
+            logger.error(f"Error saving to DB: {e}")
 
     # Save gateway to the database
     def gateway_write(self, name, eui, address, sim_number, coordinates=''):
@@ -250,7 +249,7 @@ class gateway_database:
                 self.conn.commit()
                 return "Gateway Registered"
             except sqlite3.Error as e:
-                print(f"Error saving to DB: {e}")
+                logger.error(f"Error saving to DB: {e}")
         else:
             return "Gateway Already Registered"
 
@@ -262,7 +261,7 @@ class gateway_database:
             result = self.cursor.fetchall()
             return result
         except sqlite3.Error as e:
-            print(f"Error retrieving from DB: {e}")
+            logger.error(f"Error retrieving from DB: {e}")
         
 
     # Destroyer method to close the connection
@@ -270,7 +269,6 @@ class gateway_database:
         if self.conn:
             self.cursor.close()
             self.conn.close()
-            print("Gateway Database connection closed.")
 
     def __enter__(self):
         return self
@@ -335,7 +333,7 @@ class device_database:
             """, (dev_addr, eui)) 
             self.conn.commit()  # Commit the changes to the database
         except sqlite3.Error as e:
-            print(f"Error saving to DB: {e}")
+            logger.error(f"Error saving to DB: {e}")
 
     # Check if Device gateway is the database
     def check_device_gw(self, eui):
@@ -358,7 +356,7 @@ class device_database:
             """, (gw_id, eui)) 
             self.conn.commit()  # Commit the changes to the database
         except sqlite3.Error as e:
-            print(f"Error saving to DB: {e}")
+            logger.error(f"Error saving to DB: {e}")
 
     #Get Device gateway
     def get_dev_gw(self, eui):
@@ -373,7 +371,7 @@ class device_database:
             else:
                 return None
         except sqlite3.Error as e:
-            print(f"Error retrieving from DB: {e}")
+            logger.error(f"Error retrieving from DB: {e}")
 
     def fetch_device_eui(self, uid):
         # Fetch device_eui from the database
@@ -406,7 +404,7 @@ class device_database:
                 self.conn.commit()
                 return "Device Registered"
             except sqlite3.Error as e:
-                print(f"Error saving to DB: {e}")
+                logger.error(f"Error saving to DB: {e}")
         else:
             return "Device Already Registered"
 
@@ -418,7 +416,7 @@ class device_database:
             result = self.cursor.fetchall()
             return result
         except sqlite3.Error as e:
-            print(f"Error retrieving from DB: {e}")
+            logger.error(f"Error retrieving from DB: {e}")
     
     def device_up_int_query(self):
         try:
@@ -428,7 +426,7 @@ class device_database:
             result = self.cursor.fetchall()
             return result
         except sqlite3.Error as e:
-            print(f"Error retrieving from DB: {e}")
+            logger.error(f"Error retrieving from DB: {e}")
         
     def gateway_up_int_query(self, gw_id):
         try:
@@ -439,14 +437,13 @@ class device_database:
             result = self.cursor.fetchall()
             return result
         except sqlite3.Error as e:
-            print(f"Error retrieving from DB: {e}")
+            logger.error(f"Error retrieving from DB: {e}")
     
     # Destroyer method to close the connection
     def close(self):
         if self.conn:
             self.cursor.close()
             self.conn.close()
-            print("Device Database connection closed.")
 
     def __enter__(self):
         return self
@@ -516,15 +513,10 @@ class alert_database:
                 VALUES (?, ?, ?, ?, ?, ?)
                 """, (name, eui, issue, message, severity, unique_id))
                 self.conn.commit()
-                asyncio.run(send_telegram_alert(f''' 🔴🔴🔴🔴<b><u> Device Alert </u></b>🔴🔴🔴🔴
-➡<b> Name:</b> {name}
-➡<b> EUI:</b> {eui}
-➡<b> Issue:</b> {issue}
-➡<b> Description:</b> {message}
-➡<b> Severity:</b> {severity}'''))
+                send_telegram_alert(name, eui, issue, message, severity)
                 return f"Alert Registered - {name} - {issue} - {message}"
             except sqlite3.Error as e:
-                print(f"Error saving to DB: {e}")
+                logger.error(f"Error saving to DB: {e}")
         else:
             self.cursor.execute("""
             UPDATE alert
@@ -544,7 +536,7 @@ class alert_database:
                 result = self.cursor.fetchall()
                 return result
             except sqlite3.Error as e:
-                print(f"Error retrieving from DB: {e}")
+                logger.error(f"Error retrieving from DB: {e}")
         else:
             try:
                 self.cursor.execute("""
@@ -553,7 +545,7 @@ class alert_database:
                 result = self.cursor.fetchall()
                 return result
             except sqlite3.Error as e:
-                print(f"Error retrieving from DB: {e}")
+                logger.error(f"Error retrieving from DB: {e}")
 
     def get_alert_dev_eui(self, uid):
         self.cursor.execute("""
@@ -584,7 +576,7 @@ class alert_database:
             else:
                 return "Alert Not Found"
         except sqlite3.Error as e:
-            print(f"Error removing from DB: {e}")
+            logger.error(f"Error removing from DB: {e}")
             return "Error occurred"
 
     def remove_alert(self, eui, issue):
@@ -599,7 +591,7 @@ class alert_database:
             else:
                 return "Alert Not Found"
         except sqlite3.Error as e:
-            print(f"Error removing from DB: {e}")
+            logger.error(f"Error removing from DB: {e}")
             return "Error occurred"
 
         # Destroyer method to close the connection
@@ -607,7 +599,6 @@ class alert_database:
         if self.conn:
             self.cursor.close()
             self.conn.close()
-            print("Alert Database connection closed.")
 
     def __enter__(self):
         return self
@@ -678,15 +669,10 @@ class gw_alert_database:
                 VALUES (?, ?, ?, ?, ?, ?)
                 """, (name, eui, issue, message, severity, unique_id))
                 self.conn.commit()
-                asyncio.run(send_telegram_alert(f''' ❗❗❗❗<b><u> Gateway Alert </u></b>❗❗❗❗
-➡<b> Name:</b> {name}
-➡<b> EUI:</b> {eui}
-➡<b> Issue:</b> {issue}
-➡<b> Description:</b> {message}
-➡<b> Severity:</b> {severity}'''))
+                send_telegram_alert(name, eui, issue, message, severity, True)
                 return f"GW-Alert Registered - {name} - {issue} - {message}"
             except sqlite3.Error as e:
-                print(f"Error saving to DB: {e}")
+                logger.error(f"Error saving to DB: {e}")
         else:
             self.cursor.execute("""
             UPDATE alert
@@ -706,7 +692,7 @@ class gw_alert_database:
                 result = self.cursor.fetchall()
                 return result
             except sqlite3.Error as e:
-                print(f"Error retrieving from DB: {e}")
+                logger.error(f"Error retrieving from DB: {e}")
         else:
             try:
                 self.cursor.execute("""
@@ -715,7 +701,7 @@ class gw_alert_database:
                 result = self.cursor.fetchall()
                 return result
             except sqlite3.Error as e:
-                print(f"Error retrieving from DB: {e}")
+                logger.error(f"Error retrieving from DB: {e}")
 
     def get_alert_gw_eui(self, uid):
         self.cursor.execute("""
@@ -746,7 +732,7 @@ class gw_alert_database:
             else:
                 return "GW Alert Not Found"
         except sqlite3.Error as e:
-            print(f"Error removing from DB: {e}")
+            logger.error(f"Error removing from DB: {e}")
             return "Error occurred"
 
     def remove_alert(self, eui, issue):
@@ -761,7 +747,7 @@ class gw_alert_database:
             else:
                 return "GW Alert Not Found"
         except sqlite3.Error as e:
-            print(f"Error removing from DB: {e}")
+            logger.error(f"Error removing from DB: {e}")
             return "Error occurred"
 
         # Destroyer method to close the connection
@@ -769,7 +755,6 @@ class gw_alert_database:
         if self.conn:
             self.cursor.close()
             self.conn.close()
-            print("GW Alert Database connection closed.")
 
     def __enter__(self):
         return self

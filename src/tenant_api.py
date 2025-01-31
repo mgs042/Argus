@@ -5,6 +5,7 @@ from chirpstack_api import api
 from google.protobuf.json_format import MessageToJson
 from datetime import datetime, timedelta
 from google.protobuf.timestamp_pb2 import Timestamp
+from log import logger
 
 def get_tenant_list():
      # Get environment variables
@@ -19,6 +20,6 @@ def get_tenant_list():
           resp = client.List(req, metadata=auth_token)
           return json.loads(MessageToJson(resp))['result']
      except grpc.RpcError as e:
-        print(e)
+        logger.error(e)
      
 
