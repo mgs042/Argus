@@ -1,6 +1,9 @@
 
-![Logo](/src/static/assets/images/eye.png "Argus Logo"){width=100px}
-![Title](https://github.com/user-attachments/assets/929f6ab6-28d8-4da1-8184-565eba1d73c8 "Title Text")
+<div align="center">
+  <img src='/src/static/assets/images/eye.png' alt='Logo' style='width:100px; border-radius:50px;'>
+  <img src="https://github.com/user-attachments/assets/929f6ab6-28d8-4da1-8184-565eba1d73c8" alt="Title">
+</div>
+<hr style='height: 5px;'>
 
 **IoT Security Monitoring and Resource Management Tool**
 
@@ -102,7 +105,7 @@ The number of Celery workers can be scaled depending on the network traffic. To 
 7. Optionally, configure to recieve alerts via Telegram by creating a Telegram Bot and Chat (see [this](https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a)).
 
 ---
-### **5. Register the Devices and Gateways
+### **5. Register the Devices and Gateways**
 8. Provide the gateway and device details to allow Argus to monitor it.
 
 ---
