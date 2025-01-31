@@ -102,7 +102,7 @@ The number of Celery workers can be scaled depending on the network traffic. To 
 7. Optionally, configure to recieve alerts via Telegram by creating a Telegram Bot and Chat (see [this](https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a)).
 
 ---
-### **5. Register the Devices and Gateways
+### **5. Register the Devices and Gateways**
 8. Provide the gateway and device details to allow Argus to monitor it.
 
 ---
