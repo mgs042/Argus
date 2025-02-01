@@ -286,3 +286,21 @@ def check_config():
     except json.JSONDecodeError as e:
         logger.error(f"Error parsing JSON: {e}")
         return False
+    
+def get_chripstack_details():
+    server_url = os.getenv("CHIRPSTACK_SERVER")
+    ip, port = server_url.split(':')
+    api_key = os.getenv("CHIRPSTACK_APIKEY")
+    return {
+        "ip": ip,
+        "port": port,
+        "apikey": api_key
+    }
+
+def get_telegram_details():
+    botId = os.getenv("BOT_ID")
+    chatId = os.getenv("CHAT_ID")
+    return {
+        "botId": botId,
+        "chatId": chatId
+    }

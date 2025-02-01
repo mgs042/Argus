@@ -1,5 +1,5 @@
 import os
-from config import set_env_vars, check_chirpstack_server_and_api, check_influxdb_server_auth_and_resources, check_rabbitmq_server, check_config, set_config_file, check_telegram_status
+from config import set_env_vars, check_chirpstack_server_and_api, check_influxdb_server_auth_and_resources, check_rabbitmq_server, check_config, set_config_file, check_telegram_status, get_chripstack_details,get_telegram_details
 set_env_vars()
 from flask import Flask, request, Response, render_template, jsonify, redirect, url_for, make_response, flash
 from flask_cors import CORS
@@ -15,10 +15,14 @@ from alert_api import get_alert_status, get_dev_alerts, get_gw_alert_status, get
 from celery_tasks import celery_init_app, update_influx, configure_celery_beat
 from location import rev_geocode
 from flask_jwt_extended import (JWTManager, jwt_required, get_jwt_identity,
-                                create_access_token, create_refresh_token, 
-                                set_access_cookies, set_refresh_cookies, 
-                                unset_jwt_cookies,unset_access_cookies)
+                                create_access_token, 
+                                set_access_cookies,
+                                unset_jwt_cookies, get_jwt)
 from log import logger
+from datetime import datetime
+from datetime import timedelta
+from datetime import timezone
+
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app)  # Enable CORS for all routes
@@ -30,16 +34,9 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 # Only allow JWT cookies to be sent over https. In production, this should likely be True
 app.config['JWT_COOKIE_SECURE'] = False
 
-# Set the cookie paths, so that you are only sending your access token
-# cookie to the access endpoints, and only sending your refresh token
-# to the refresh endpoint. Technically this is optional, but it is in
-# your best interest to not send additional cookies in the request if
-# they aren't needed.
-# app.config['JWT_ACCESS_COOKIE_PATH'] = '/api/'
-app.config['JWT_REFRESH_COOKIE_PATH'] = '/token/refresh'
-
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 app.config['JWT_CSRF_CHECK_FORM'] = True
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 
 app.config["JWT_SECRET_KEY"] = str(os.urandom(32).hex())
 jwt = JWTManager(app)
@@ -114,10 +111,8 @@ def login():
         if check:
             # Create the tokens we will be sending back to the user
             access_token = create_access_token(identity=uid)
-            refresh_token = create_refresh_token(identity=uid)
             resp = redirect(url_for('dashboard'))
             set_access_cookies(resp, access_token)
-            set_refresh_cookies(resp, refresh_token)
             return resp     
         else:
             flash("Bad Credentials -- Username or Password is Incorrect")
@@ -127,27 +122,28 @@ def login():
 @app.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
-    uid = get_jwt_identity()
-    with user_database() as db:
-        if not db.check_uid_registered(uid):
-            return redirect(url_for('index'))
     resp = redirect(url_for('index'))
     unset_jwt_cookies(resp)
-    return resp, 200
-
-
-@app.route('/token/refresh', methods=['GET'])
-@jwt_required(refresh=True)
-def refresh():
-    # Refreshing expired Access token
-    uid = get_jwt_identity()
-    with user_database() as db:
-        if not db.check_uid_registered(uid):
-            return redirect(url_for('index'))
-    access_token = create_access_token(identity=str(uid))
-    resp = make_response(redirect(url_for('dashboard')))
-    set_access_cookies(resp, access_token)
+    
+    # Debugging: Print response headers
     return resp
+
+
+# Using an `after_request` callback, we refresh any token that is within 30
+# minutes of expiring. Change the timedeltas to match the needs of your application.
+@app.after_request
+def refresh_expiring_jwts(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+            set_access_cookies(response, access_token)
+        return response
+    except (RuntimeError, KeyError):
+        # Case where there is not a valid JWT. Just return the original response
+        return response
 
 @app.route('/user_registration', methods=['GET', 'POST'])
 @jwt_required()
@@ -269,12 +265,19 @@ def config_details():
         
         set_config_file(config_var=config_var)
 
+    chirpstack_details = get_chripstack_details()
+    telegram_details = get_telegram_details()
+    return render_template("config_details.html", chirpstack_details=chirpstack_details, telegram_details=telegram_details, name=name, username=username)
+
+
+@app.route('/config_check', methods=['GET'])
+@jwt_required()
+def config_check():
     chirpstack_status = check_chirpstack_server_and_api(os.getenv("CHIRPSTACK_SERVER"), os.getenv("CHIRPSTACK_APIKEY"))
     influxdb_status = check_influxdb_server_auth_and_resources(os.getenv("INFLUXDB_SERVER"), os.getenv("INFLUXDB_TOKEN"), os.getenv("INFLUXDB_ORG"), os.getenv("INFLUXDB_BUCKET"))
     rabbitmq_status = check_rabbitmq_server(os.getenv("MESSAGE_BROKER"))
     telegram_status = check_telegram_status(os.getenv("BOT_ID"), os.getenv("CHAT_ID"))
-    return render_template("config_details.html", chirpstack_status=chirpstack_status, influxdb_status=influxdb_status, rabbitmq_status=rabbitmq_status, telegram_status=telegram_status, name=name, username=username)
-
+    return [chirpstack_status, influxdb_status, rabbitmq_status, telegram_status]
 
 @app.route('/gateway_registration', methods=['GET', 'POST'])
 @jwt_required()
@@ -660,8 +663,8 @@ def invalid_token_callback(callback):
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
     # Expired auth header
-    resp = make_response(redirect(url_for('refresh')))
-    unset_access_cookies(resp)
+    resp = make_response(redirect(url_for('index')))
+    unset_jwt_cookies(resp)
     return resp, 302
 
 @app.errorhandler(404)

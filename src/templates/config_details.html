@@ -160,8 +160,14 @@
             <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
               <span class="mdi mdi-format-line-spacing"></span>
             </button>
+            <form action="/logout" method="POST" class="align-self-center ms-auto">
+              <input type="hidden" id="csrf_token" name="csrf_token">
+              <button type="submit" class="btn btn-danger">Logout</button>
+          </form>
+                   
           </div>
         </nav>
+        
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
@@ -180,28 +186,28 @@
                       <div class="form-group row">
                         <label for="chirpstack-server" class="col-4 col-form-label">Chirpstack Server:</label>
                         <div class="col-5">
-                          <input name="chirpstack-ip" type="text" class="form-control" id="chirpstack-server" placeholder="IP Address" value="{{ chirpstack_status['ip'] }}">
+                          <input name="chirpstack-ip" type="text" class="form-control" id="chirpstack-server" placeholder="IP Address" value="{{ chirpstack_details['ip'] }}">
                         </div>
                         <div class="col-2">
-                          <input name="chirpstack-port" type="text" class="form-control" id="chirpstack-server" placeholder="Port" value="{{ chirpstack_status['port'] }}">
+                          <input name="chirpstack-port" type="text" class="form-control" id="chirpstack-server" placeholder="Port" value="{{ chirpstack_details['port'] }}">
                         </div>
                       </div>
                       <div class="form-group row">
                         <label for="chirpstack-api" class="col-4 col-form-label">Chirpstack API Key: </label>
                         <div class="col-7">
-                          <input name="chirpstack-api" type="password" class="form-control" id="chirpstack-api" placeholder="API Key" value="{{ chirpstack_status['apikey'] }}">
+                          <input name="chirpstack-api" type="password" class="form-control" id="chirpstack-api" placeholder="API Key" value="{{ chirpstack_details['apikey'] }}">
                         </div>
                       </div>
                       <div class="form-group row">
                         <label for="bot_id" class="col-4 col-form-label">Telegram Bot ID: </label>
                         <div class="col-7">
-                          <input name="bot_id" type="password" class="form-control" id="bot_id" placeholder="Bot ID" value="{{ telegram_status['botId'] }}">
+                          <input name="bot_id" type="password" class="form-control" id="bot_id" placeholder="Bot ID" value="{{ telegram_details['botId'] }}">
                         </div>
                       </div>
                       <div class="form-group row">
                         <label for="chat_id" class="col-4 col-form-label">Telegram Chat ID: </label>
                         <div class="col-7">
-                          <input name="chat_id" type="password" class="form-control" id="chat_id" placeholder="Chat ID" value="{{ telegram_status['chatId'] }}">
+                          <input name="chat_id" type="password" class="form-control" id="chat_id" placeholder="Chat ID" value="{{ telegram_details['chatId'] }}">
                         </div>
                       </div>
                       <input type="hidden" id="csrf_token" name="csrf_token">
@@ -212,46 +218,30 @@
               </div>
               <div class="col-1"></div>
               <div class="card col-4 config-details">
-                  <p><span class="key">Chirpstack Server:</span> 
-                      <span class="value {% if chirpstack_status['server_health']['reachable'] == False %} text-danger {% endif %}">
-                          {{ chirpstack_status['server_health']['details'] }}
-                      </span>
-                  </p>
-                  <p><span class="key">Chirpstack API Key:</span> 
-                      <span class="value {% if chirpstack_status['api_key_valid']['valid'] == False %} text-danger {% endif %}">
-                          {{ chirpstack_status['api_key_valid']['details'] }}
-                      </span>
-                  </p>
-                  <p><span class="key">InfluxDB Server:</span> 
-                      <span class="value {% if influxdb_status['server_health']['reachable'] == False %} text-danger {% endif %}">
-                          {{ influxdb_status['server_health']['details'] }}
-                      </span>
-                  </p>
-                  <p><span class="key">InfluxDB Token:</span> 
-                      <span class="value {% if influxdb_status['auth_valid']['valid'] == False %} text-danger {% endif %}">
-                          {{ influxdb_status['auth_valid']['details'] }}
-                      </span>
-                  </p>                    
-                  <p><span class="key">InfluxDB Organization:</span> 
-                      <span class="value {% if influxdb_status['org_valid']['valid'] == False %} text-danger {% endif %}">
-                          {{ influxdb_status['org_valid']['details'] }}
-                      </span>
-                  </p>
-                  <p><span class="key">InfluxDB Bucket:</span> 
-                      <span class="value {% if influxdb_status['bucket_valid']['valid'] == False %} text-danger {% endif %}">
-                          {{ influxdb_status['bucket_valid']['details'] }}
-                      </span>
-                  </p>
-                  <p><span class="key">RabbitMQ Server:</span> 
-                      <span class="value {% if rabbitmq_status['server_health']['reachable'] == False %} text-danger {% endif %}">
-                          {{ rabbitmq_status['server_health']['details'] }}
-                      </span>
-                  </p>
-                  <p><span class="key">Telegram:</span> 
-                    <span class="value {% if telegram_status['validity'] == False %} text-danger {% endif %}">
-                        {{ telegram_status['details'] }}
-                    </span>
-                </p>
+                <div>
+                  <h4>ChirpStack</h4>
+                  <p>Server Status: <span id="chirpstack_server_status"></span></p>
+                  <p>API Key Status: <span id="chirpstack_api_status"></span></p>
+              </div>
+          
+              <div>
+                  <h4>InfluxDB</h4>
+                  <p>Server Status: <span id="influxdb_server_status"></span></p>
+                  <p>Token Status: <span id="influxdb_token_status"></span></p>
+                  <p>Organization Status: <span id="influxdb_org_status"></span></p>
+                  <p>Bucket Status: <span id="influxdb_bucket_status"></span></p>
+              </div>
+          
+              <div>
+                  <h4>RabbitMQ</h4>
+                  <p>Server Status: <span id="rabbitmq_server_status"></span></p>
+              </div>
+          
+              <div>
+                  <h4>Telegram</h4>
+                  <p>Connection Status: <span id="telegram_conn_status"></span></p>
+              </div>
+                <button id="config-check-button">Check Configuration</button>
               </div>
               <div class="col-1"></div>
             </div>
@@ -271,7 +261,7 @@
       <!-- page-body-wrapper ends -->
     </div>
 
-   
+   <script src="../static/js/config_check.js"></script>
    <!-- plugins:js -->
    <script src="../static/assets/vendors/js/vendor.bundle.base.js"></script>
    <!-- endinject -->

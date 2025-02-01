@@ -108,6 +108,9 @@
 /*-------------------------------------------------------------------*/
 /* === SCSS Compass Functions === */
 /* Ensure the parent container uses flexbox for wrapping */
+.no-padding{
+  padding: 0 !important;
+}
 
 #dynamic-rows{
   margin-left: 20px;
@@ -147,7 +150,7 @@
 
 .config-details{
   padding: 30px;
-  max-height: 345px;
+  max-height: 500px;
 }
 #dynamic-rows1 {
   display: flex;
