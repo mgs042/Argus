@@ -124,22 +124,13 @@
 }
 
 .image-container img {
-    width: 20%;
-    height: 80%;
+    width: 33%;
+    height: 100%;
     border-radius: 50px;
     transition: opacity 0.5s ease; /* Smoothly transition visibility */
     animation: blink 6s infinite;
 }
-.blink-text {
-  font-family: Argus;
-  position: absolute;
-  color: whitesmoke; /* Text color */
-  font-size: 2.35rem; /* Adjust font size */
-  opacity: 0; /* Initially hidden */
-  pointer-events: none; /* Prevent interaction with the text */
-  transition: opacity 0.5s ease; /* Smoothly transition visibility */
-  animation: text-blink 6s infinite;
-}
+
 
 @keyframes blink {
   0%, 100% {
@@ -150,11 +141,6 @@
   }
 }
 
-@keyframes text-blink {
-  0% { opacity: 1; }    /* Fully visible */
-  50% { opacity: 0; }   /* Fully hidden */
-  100% { opacity: 1; }  /* Fully visible again */
-}
 .config-form{
   padding: 1.2rem;
 }
@@ -23713,6 +23699,7 @@ dl li {
 /* Auth */
 .auth.login-bg {
   background-color: #000;
+  padding-top: 0px !important;
 
 }
 .auth .login-half-bg {
@@ -24275,11 +24262,12 @@ dl li {
   color: #252b3e;
 }
 .sidebar .sidebar-brand-wrapper .sidebar-brand img {
-  border-radius: 50px;
-  width: 55px;
-  height: 35px;
+  border-radius: 60px;
+  width: 65px;
+  height: 45px;
   margin-top: 10px;
   vertical-align: middle;
+  
 }
 .sidebar .sidebar-brand-wrapper .sidebar-brand.brand-logo-mini {
   display: none;
