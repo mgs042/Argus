@@ -110,3 +110,8 @@ src/celerybeat-schedule.db
 
 src/test.py
 
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+SECURITY.md
+LICENSE
+
