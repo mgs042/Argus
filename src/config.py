@@ -16,6 +16,7 @@ def set_config_file(config_var):
     for key in config:
         if config[key] != config_var[key] and (config_var[key] != '' and config_var[key] != ':' and config_var[key] != None) :
             config[key] = config_var[key]
+    print(config)
     with open(CONFIG_FILE, 'w') as file:
         json.dump(config, file, indent=4)
     set_env_vars()

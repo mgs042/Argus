@@ -15,7 +15,7 @@ from alert_api import get_alert_status, get_dev_alerts, get_gw_alert_status, get
 from celery_tasks import celery_init_app, update_influx, configure_celery_beat
 from location import rev_geocode
 from flask_jwt_extended import (JWTManager, jwt_required, get_jwt_identity,
-                                create_access_token, 
+                                create_access_token,
                                 set_access_cookies,
                                 unset_jwt_cookies, get_jwt)
 from log import logger
@@ -66,7 +66,8 @@ def dashboard():
         else:
             name, username = db.fetch_user(uid)
     if check_config():
-        return render_template("dashboard.html", tenant_count=get_tenant_count(), app_count=get_app_count(), name=name, username=username)
+        csrf_token = (get_jwt() or {}).get("csrf")
+        return render_template("dashboard.html", tenant_count=get_tenant_count(), app_count=get_app_count(), name=name, username=username, csrf_token=csrf_token)
     else:
         flash("Configuration Check Failed -- One or more of the required dependencies have not been met")
         return redirect(url_for('config_details'))
@@ -155,7 +156,8 @@ def user_register():
         else:
             name, username = db.fetch_user(uid)
     if request.method == 'GET':
-        return render_template('user_reg.html', name=name, username=username)
+        csrf_token = (get_jwt() or {}).get("csrf")
+        return render_template('user_reg.html', name=name, username=username, csrf_token=csrf_token)
     elif request.method == 'POST':
         u_name = request.form.get('name')
         u_email = request.form.get('email') or "Unknown"
@@ -189,7 +191,8 @@ def account_settings():
             name, username = db.fetch_user(uid)
         user = db.fetch_user_details(uid)
     if request.method == 'GET':
-        return render_template('account_settings.html', name=name, username=username, user = user)
+        csrf_token = (get_jwt() or {}).get("csrf")
+        return render_template('account_settings.html', name=name, username=username, user = user, csrf_token=csrf_token)
     elif request.method == 'POST':
         u_name = request.form.get('name')
         u_email = request.form.get('email') or "Unknown"
@@ -214,7 +217,8 @@ def change_pass():
         else:
             name, username = db.fetch_user(uid)
     if request.method == 'GET':
-        return render_template('change_pass.html', name=name, username=username)
+        csrf_token = (get_jwt() or {}).get("csrf")
+        return render_template('change_pass.html', name=name, username=username, csrf_token=csrf_token)
     elif request.method == 'POST':
         u_old_password = request.form.get('old_pass')
         u_password = request.form.get('new_pass')
@@ -243,13 +247,10 @@ def config_details():
         else:
             name, username = db.fetch_user(uid)
     if request.method == 'POST':
-        chirpstack_server = influxdb_server = rabbitmq_server = None
+        print(request)
+        chirpstack_server = None
         if request.form.get('chirpstack-ip') != None and request.form.get('chirpstack-port') != None:
             chirpstack_server = request.form.get('chirpstack-ip') + ':' + request.form.get('chirpstack-port')
-        if request.form.get('influxdb-ip') != None and request.form.get('influxdb-port') != None:
-            influxdb_server = request.form.get('influxdb-ip') + ':' + request.form.get('influxdb-port')
-        if request.form.get('rabbitmq-ip') != None and request.form.get('rabbitmq-port') != None:
-            rabbitmq_server = request.form.get('rabbitmq-ip') + ':' + request.form.get('rabbitmq-port')
         config_var = {
                     "CHIRPSTACK_APIKEY": request.form.get('chirpstack-api'),
                     "CHIRPSTACK_SERVER": chirpstack_server,
@@ -262,12 +263,14 @@ def config_details():
                     "CHAT_ID": request.form.get('chat_id')
                 }
 
-        
+        print(config_var)
         set_config_file(config_var=config_var)
-
-    chirpstack_details = get_chripstack_details()
-    telegram_details = get_telegram_details()
-    return render_template("config_details.html", chirpstack_details=chirpstack_details, telegram_details=telegram_details, name=name, username=username)
+        return redirect(url_for('config_details'))
+    else:
+        chirpstack_details = get_chripstack_details()
+        telegram_details = get_telegram_details()
+        csrf_token = (get_jwt() or {}).get("csrf")
+        return render_template("config_details.html", chirpstack_details=chirpstack_details, telegram_details=telegram_details, name=name, username=username, csrf_token=csrf_token)
 
 
 @app.route('/config_check', methods=['GET'])
@@ -297,8 +300,8 @@ def gateway_register():
             result=db.gateway_write(g_name, g_id, g_address, g_number)
         return redirect(url_for('gateways'))
 
-        
-    return render_template("gateway_reg.html", name=name, username=username)
+    csrf_token = (get_jwt() or {}).get("csrf")    
+    return render_template("gateway_reg.html", name=name, username=username, csrf_token=csrf_token)
 
 @app.route('/device_registration', methods=['GET', 'POST'])
 @jwt_required()
@@ -319,8 +322,8 @@ def dev_register():
             result=db.device_write(d_name, d_id, d_gw, d_addr, d_up_int)
         
         return redirect(url_for('devices'))
-        
-    return render_template("device_reg.html", name=name, username=username)
+    csrf_token = (get_jwt() or {}).get("csrf")  
+    return render_template("device_reg.html", name=name, username=username, csrf_token=csrf_token)
 
 @app.route('/gateways', methods=['GET'])
 @jwt_required()
@@ -331,7 +334,8 @@ def gateways():
             return redirect(url_for('index'))
         else:
             name, username = db.fetch_user(uid)
-    return render_template("gateways_list.html", name=name, username=username)
+    csrf_token = (get_jwt() or {}).get("csrf")
+    return render_template("gateways_list.html", name=name, username=username, csrf_token=csrf_token)
 
 @app.route('/devices', methods=['GET'])
 @jwt_required()
@@ -342,7 +346,8 @@ def devices():
             return redirect(url_for('index'))
         else:
             name, username = db.fetch_user(uid)
-    return render_template("devices_list.html", name=name, username=username)
+    csrf_token = (get_jwt() or {}).get("csrf")
+    return render_template("devices_list.html", name=name, username=username, csrf_token=csrf_token)
 
 @app.route('/gateway', methods=['GET'])
 @jwt_required()
@@ -373,7 +378,8 @@ def gateway():
             else:
                 gateway_details = get_gateway_details(gateway_id)
                 gateway_alerts = get_gw_alerts(gateway_id)
-                return render_template("gateway_details.html", gateway=gateway_details, uid=gateway_uid, gw_alerts = gateway_alerts, name=name, username=username)
+                csrf_token = (get_jwt() or {}).get("csrf")
+                return render_template("gateway_details.html", gateway=gateway_details, uid=gateway_uid, gw_alerts = gateway_alerts, name=name, username=username, csrf_token=csrf_token)
         
         else:
             # If no 'id' is passed, return a 400 error or some default message
@@ -412,7 +418,8 @@ def device():
             else:
                 device_details = get_dev_details(device_eui)
                 device_alerts = get_dev_alerts(device_eui)
-                return render_template("device_details.html", device=device_details, uid=device_uid, dev_alerts=device_alerts, name=name, username=username)
+                csrf_token = (get_jwt() or {}).get("csrf")
+                return render_template("device_details.html", device=device_details, uid=device_uid, dev_alerts=device_alerts, name=name, username=username, csrf_token=csrf_token)
         
         else:
             # If no 'id' is passed, return a 400 error or some default message

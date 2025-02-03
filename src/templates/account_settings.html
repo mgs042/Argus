@@ -160,7 +160,7 @@
               <span class="mdi mdi-format-line-spacing"></span>
             </button>
             <form action="/logout" method="POST" class="align-self-center ms-auto">
-              <input type="hidden" id="csrf_token" name="csrf_token">
+              <input hidden name="csrf_token" value="{{ csrf_token }}">
               <button type="submit" class="btn btn-danger">Logout</button>
           </form>
           </div>
@@ -203,7 +203,7 @@
                               <input name="username" type="text" class="form-control" id="username" placeholder="Enter your Username" value="{{ user['username'] }}" required>
                             </div>
                         </div>
-                        <input type="hidden" id="csrf_token" name="csrf_token">
+                        <input hidden name="csrf_token" value="{{ csrf_token }}">
                         <button type="submit" class="btn btn-primary me-2 float-end">Submit</button>
                       </form>
                     </div>

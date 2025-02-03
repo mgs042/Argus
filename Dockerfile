@@ -20,4 +20,4 @@ COPY ./src /app
 EXPOSE 5000
 
 # Default command
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8008", "app:app"]

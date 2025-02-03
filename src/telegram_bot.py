@@ -1,18 +1,14 @@
-from telegram import Bot
 from telegram.constants import ParseMode
-from config import check_telegram_status
+from config import check_telegram_status, get_telegram_details
 import time
 import os
 import requests
 from log import logger
-
 # Replace with your bot token from BotFather
 TOKEN = os.getenv('BOT_ID')
 # Replace with your chat ID (you can get this by sending a message to your bot and checking the updates)
 CHAT_ID = os.getenv('CHAT_ID')
 
-# Initialize the bot
-bot = Bot(token=TOKEN)
 
 def send_telegram_alert(name, eui, issue, message, severity, isGw=False):
     if isGw:

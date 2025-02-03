@@ -161,7 +161,7 @@
               <span class="mdi mdi-format-line-spacing"></span>
             </button>
             <form action="/logout" method="POST" class="align-self-center ms-auto">
-              <input type="hidden" id="csrf_token" name="csrf_token">
+              <input hidden name="csrf_token" value="{{ csrf_token }}">
               <button type="submit" class="btn btn-danger">Logout</button>
           </form>
           </div>
@@ -205,7 +205,7 @@
                           <input name="number" type="text" class="form-control" id="number" placeholder="SIM number of the Gateway">
                         </div>
                       </div>
-                      <input type="hidden" id="csrf_token" name="csrf_token">
+                      <input hidden name="csrf_token" value="{{ csrf_token }}">
                       <button type="submit" class="btn btn-primary me-2 float-end">Submit</button>
                     </form>
                   </div>
