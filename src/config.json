@@ -1,9 +1,11 @@
 {
-    "CHIRPSTACK_APIKEY": "<API-KEY>",
-    "CHIRPSTACK_SERVER": "<IP:Port>",
-    "MESSAGE_BROKER": "<IP:Port>",
-    "INFLUXDB_SERVER": "<IP:Port>",
-    "INFLUXDB_TOKEN": "<API-KEY>",
-    "INFLUXDB_ORG": "<Org-Name>",
-    "INFLUXDB_BUCKET": "<Bucket-Name>"
+    "CHIRPSTACK_APIKEY": "",
+    "CHIRPSTACK_SERVER": "localhost:8080",
+    "MESSAGE_BROKER": "argus_rabbitmq:5672",
+    "INFLUXDB_SERVER": "argus_influx:8086",
+    "INFLUXDB_TOKEN": "OPERATOR_TOKEN_1475963987412365987456321042",
+    "INFLUXDB_ORG": "Argus",
+    "INFLUXDB_BUCKET": "uplink_metrics_log",
+    "BOT_ID": "",
+    "CHAT_ID": ""
 }
