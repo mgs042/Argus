@@ -12,7 +12,7 @@
 
 ## **Overview**
 
-**Argus** is an IoT security monitoring and resource management tool designed to integrate seamlessly with the **Chirpstack Application Server**. It collects event metrics, monitors network resources, stores relevant metrics in **InfluxDB**, and downsamples it with pre-defined Influx Tasks. Argus utilizes **Celery** workers for background task processing, including periodic **threat detection checks** and metric data processing. It can be deployed as Docker containers via Docker Compose for easy setup, scalability, and management.
+**Argus** is an IoT security monitoring and resource management tool designed to integrate seamlessly with the **Chirpstack Application Server**. It collects event metrics, monitors network resources, stores relevant metrics in **InfluxDB**, and downsamples it with predefined Influx Tasks. Argus utilizes **Celery** workers for background task processing, including periodic **threat detection checks** and metric data processing. It can be deployed as Docker containers via Docker Compose for easy setup, scalability, and management.
 
 ### **Key Features:**
 
@@ -89,7 +89,7 @@ Argus uses **Docker Compose** to manage multiple containers. Follow the steps be
 5. Once the containers are up and running, you can access the **Argus web dashboard** at [`http://localhost:5000`](http://localhost:5000) and monitor the device status and network security.
 
     - **Default Username**: admin
-    - **Defualt Password**: admin1234
+    - **Default Password**: admin1234
 6. Check if all the necessary components are up and running.
 ---
 ### **3. Scale Celery Workers**
@@ -130,7 +130,7 @@ Argus is capable of detecting the following security threats:
 - **Packet Loss**: Argus will soon monitor and alert for sudden or abnormal packet loss, indicating network instability or attack.
 - **Active/Inactive Devices and Gateways**: Tracks whether gateways and devices are active or inactive in the network, ensuring that all components are properly monitored for security issues.
 - **RF Jamming**: Monitors whether LoRa RF signals are not being jammed and ensures that the gateway receivers have a good signal strength and a signal-to-noise ratio to separate the original signal from the modulated carrier
-- **Link Margin**: Monitors whether Signal strength is optimum for LoRa signals to be decoded, it should neither be too high (unecessary wastage of power) or too low (chances of information loss).
+- **Link Margin**: Monitors whether Signal strength is optimum for LoRa signals to be decoded, it should neither be too high (unnecessary wastage of power) or too low (chances of information loss).
 - **Battery Status**: Alerts when the battery level shown in the device status messages are too low.
 - **Gateway Location Shift**: Keeps track of gateway locations and detects any location shifts.
 
@@ -155,7 +155,7 @@ As your network grows, Argus can be scaled to handle larger volumes of device da
 
 - **Chirpstack** for IoT network management.
 - **InfluxDB** for time-series data storage.
-- **Celery** for background task scheduling and asynchronus task execution.
+- **Celery** for background task scheduling and asynchronous task execution.
 - **Docker** and **Docker Compose** for containerized deployment and scalability.
 - **RabbitMQ** for message queuing and worker communication.
 - **Plotly** for building the charts in the frontend dashboard.
