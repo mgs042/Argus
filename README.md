@@ -37,7 +37,7 @@
     - **Celery Beat** (For periodic tasks)
     - **Celery Workers** (For handling background tasks, scalable based on network traffic)
 - **Scalability**: The Celery workers can be scaled up based on the traffic load and network size, allowing for high availability and better performance in large-scale networks.
-- **Telegram**: Can choose to recieve alerts via a custom **Telegram Bot**.
+- **Telegram**: Can choose to receive alerts via a custom **Telegram Bot**.
 
 ---
 
@@ -98,11 +98,11 @@ Argus uses **Docker Compose** to manage multiple containers. Follow the steps be
 
 ---
 ### **4. Configure**
-8. Configure **Argus** to recieve event updates from a **Chirpstack server** by providing:
+8. Configure **Argus** to receive event updates from a **Chirpstack server** by providing:
     - **IP Address**
     - **Port**
     - **All Access API key**
-9. Optionally, configure to recieve alerts via Telegram by creating a Telegram Bot and Chat (see [this](https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a)).
+9. Optionally, configure to receive alerts via Telegram by creating a Telegram Bot and Chat (see [this](https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a)).
 
 ---
 ### **5. Register the Devices and Gateways**
